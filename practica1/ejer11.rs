@@ -1,7 +1,7 @@
 use std::io::{stdin};
 
 fn main() {
-    let cadenas = ["Estas", "son", "las", "cinco", "cadenas"];
+    let cadenas = ["Estas".to_string(), "son".to_string(), "las".to_string(), "cinco".to_string(), "cadenas".to_string()];
 
     let mut cadena_usuario = String::new();
     println!("Ingrese una cadena para comprobar si se encuentra en el arreglo: ");
@@ -9,10 +9,7 @@ fn main() {
 
     cadena_usuario = cadena_usuario.trim().to_string();
 
-    for cadena in cadenas {
-        if cadena == cadena_usuario {
-            println!("Cadena encontrada!");
-            break;
-        }
+    if cadenas.contains(&cadena_usuario) {
+        println!("Cadena encontrada!");   
     }
 }

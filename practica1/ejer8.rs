@@ -10,12 +10,6 @@ fn main() {
 
     let c: char = data.trim().parse().expect("Invalid character!");
 
-    let mut count = 0;
-    for s in CADENA.chars() {
-        if s == c {
-            count += 1;
-        }
-    }
-
+    let count = CADENA.matches(c).count();
     println!("{} aparece {} veces en \"{}\"", c, count, CADENA);
 }
