@@ -1,16 +1,16 @@
 pub fn es_primo(num: i32) -> bool {
-    let mut counter = 0;
+    let mut count = 0;
     for i in 1..num + 1 {
         if num % i == 0 {
-            counter += 1;
+            count += 1;
         }
 
-        if counter > 2 {
+        if count > 2 {
             break;
         }
     }
 
-    counter <= 2
+    count <= 2
 }
 
 #[test]
