@@ -1,4 +1,5 @@
 mod practica2;
+mod entregas;
 
 fn main() {
     let num = 10;
