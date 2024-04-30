@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 enum Color {
     Rojo,
     Verde,
@@ -17,6 +17,7 @@ impl Color {
     }
 }
 
+#[derive(Clone)]
 struct Auto {
     marca: String,
     modelo: String,
@@ -102,7 +103,6 @@ impl ConcesionarioAuto {
         }
     }
 
-    //TODO: Ver si esta bien esto
     fn eliminar_auto(&mut self, auto: &Auto) {
         let mut index = -1;
         for i in 0..self.autos.len() {
@@ -117,8 +117,77 @@ impl ConcesionarioAuto {
         }
     }
 
-    //TODO: Hacer
-    fn buscar_auto(&self, auto: &Auto) -> Auto {
-        
+    fn buscar_auto(&self, auto: &Auto) -> Option<Auto> {
+        let mut opt = None;
+
+        for i in 0..self.autos.len() {
+            if self.autos.get(i).unwrap().compare(auto) {
+                opt = Some(self.autos.get(i).unwrap().to_owned())
+            }
+        }
+
+        opt
     }
+}
+
+#[test]
+fn test_calcular_precio() {
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
+
+    assert_eq!(audi.calcular_precio(), 25000.0);
+    assert_eq!(bmw.calcular_precio(), 27000.0)
+}
+
+#[test]
+fn test_compare() {
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let audi2 = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
+
+    assert!(audi.compare(&audi2));
+    assert!(audi2.compare(&audi));
+    assert!(!audi.compare(&bmw));
+    assert!(!bmw.compare(&audi));
+}
+
+#[test]
+fn test_agregar_auto() {
+    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let audi2 = Auto::new("Audi", "TT", 2020, 20000.0, Color::Azul);
+    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
+    let bmw2 = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Verde);
+    let bmw3 = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Negro);
+    assert!(concesionaria.agregar_auto(audi));
+    assert!(concesionaria.agregar_auto(audi2));
+    assert!(concesionaria.agregar_auto(bmw));
+    assert!(concesionaria.agregar_auto(bmw2));
+    assert!(!concesionaria.agregar_auto(bmw3));
+    assert_eq!(concesionaria.autos.len(), 4);
+}
+
+#[test]
+fn test_buscar_auto() {
+    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+
+    concesionaria.agregar_auto(audi);
+
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    assert!(concesionaria.buscar_auto(&audi).is_some());
+    let audi_azul = Auto::new("Audi", "TT", 2020, 20000.0, Color::Azul);
+    assert!(concesionaria.buscar_auto(&audi_azul).is_none());
+}
+
+#[test]
+fn test_eliminar_auto() {
+    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+
+    concesionaria.agregar_auto(audi);
+    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    concesionaria.eliminar_auto(&audi);
+    assert_eq!(concesionaria.autos.len(), 0);
+    assert!(concesionaria.buscar_auto(&audi).is_none());
 }
