@@ -117,6 +117,7 @@ impl ConcesionarioAuto {
         }
     }
 
+    //REVIEW: Preguntar si esta bien la manera de extraer en el opt despues del if
     fn buscar_auto(&self, auto: &Auto) -> Option<Auto> {
         let mut opt = None;
 
