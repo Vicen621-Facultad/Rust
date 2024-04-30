@@ -58,7 +58,7 @@ impl Auto {
             descuento += 0.1
         }
 
-        if self.marca == String::from("BMW") {
+        if self.marca == "BMW" {
             recargo += 0.15;
         }
 
