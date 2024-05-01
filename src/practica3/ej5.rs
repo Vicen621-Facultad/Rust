@@ -5,8 +5,7 @@ struct Producto {
 }
 
 impl Producto {
-    fn new(nombre: &str, precio_bruto: f64, id: u32) -> Producto {
-        let nombre = nombre.to_owned();
+    fn new(nombre: String, precio_bruto: f64, id: u32) -> Producto {
         Producto {
             nombre,
             precio_bruto,
@@ -38,7 +37,7 @@ impl Producto {
 
 #[test]
 fn test_caluclar_impuestos() {
-    let producto = Producto::new("Chipa", 200.0, 1);
+    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
 
     assert_eq!(producto.calcular_impuestos(10.0), 20.0);
     assert_eq!(producto.calcular_impuestos(100.0), 200.0);
@@ -47,7 +46,7 @@ fn test_caluclar_impuestos() {
 
 #[test]
 fn test_aplicar_descuento() {
-    let producto = Producto::new("Chipa", 200.0, 1);
+    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
 
     assert_eq!(producto.aplicar_descuento(10.0), 20.0);
     assert_eq!(producto.aplicar_descuento(100.0), 200.0);
@@ -56,7 +55,7 @@ fn test_aplicar_descuento() {
 
 #[test]
 fn test_calcular_precio_total() {
-    let producto = Producto::new("Chipa", 200.0, 1);
+    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
 
     assert_eq!(producto.calcular_precio_total(Some(10.0), Some(10.0)), 200.0);
     assert_eq!(producto.calcular_precio_total(Some(21.0), None), 242.0);

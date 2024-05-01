@@ -1,11 +1,11 @@
-struct Fecha {
+pub struct Fecha {
     dia: u32,
     mes: u32,
     año: u32,
 }
 
 impl Fecha {
-    fn new(dia: u32, mes: u32, año: u32) -> Fecha {
+    pub fn new(dia: u32, mes: u32, año: u32) -> Fecha {
         Fecha {
             dia,
             mes,
@@ -13,11 +13,11 @@ impl Fecha {
         }
     }
 
-    fn es_fecha_valida(&self) -> bool {
+    pub fn es_fecha_valida(&self) -> bool {
         self.dia <= self.obtener_dias_para_mes() && self.dia > 0
     }
 
-    fn es_bisiesto(&self) -> bool {
+    pub fn es_bisiesto(&self) -> bool {
         self.año % 4 == 0
     }
 
@@ -33,18 +33,47 @@ impl Fecha {
         dias + (self.mes == 2 && self.es_bisiesto()) as u32
     }
 
-    //TODO: Hacer
-    fn sumar_dias(&mut self, _dias: u32) {
+    pub fn sumar_dias(&mut self, dias: u32) {
+        let mut dias_restantes = dias;
+        while dias_restantes > 0 {
+            let dias_en_mes = self.obtener_dias_para_mes();
+            // Se suma 1 ya que tengo que contar el dia actual
+            let dias_hasta_fin_de_mes = dias_en_mes - self.dia + 1;
 
+            if dias_hasta_fin_de_mes > dias_restantes {
+                self.dia += dias_restantes;
+                dias_restantes = 0;
+            } else {
+                dias_restantes -= dias_hasta_fin_de_mes;
+                self.mes += 1;
+                if self.mes > 12 {
+                    self.mes = 1;
+                    self.año += 1;
+                }
+                self.dia = 1;
+            }
+        }
     }
 
-    //TODO: Hacer
-    fn restar_dias(&mut self, _dias: u32) {
-
+    pub fn restar_dias(&mut self, dias: u32) {
+        let mut dias_restantes = dias;
+        while dias_restantes > 0 {
+            if self.dia > dias_restantes {
+                self.dia -= dias_restantes;
+                dias_restantes = 0;
+            } else {
+                dias_restantes -= self.dia;
+                self.mes -= 1;
+                if self.mes == 0 {
+                    self.mes = 12;
+                    self.año -= 1;
+                }
+                self.dia = self.obtener_dias_para_mes();
+            }
+        }
     }
 
-    //TODO Preguntar si esto es que la que recibe es anterior o posterior
-    fn es_mayor(&self, una_fecha: &Fecha) -> bool {
+    pub fn es_mayor(&self, una_fecha: &Fecha) -> bool {
         (self.año > una_fecha.año) || 
             (self.año == una_fecha.año && self.mes > una_fecha.mes) || 
             (self.año == una_fecha.año && self.mes == una_fecha.mes && self.dia > una_fecha.dia)
@@ -87,9 +116,26 @@ fn test_sumar_dias() {
     assert_eq!(fecha.dia, 31);
     assert_eq!(fecha.mes, 12);
     assert_eq!(fecha.año, 2024);
+
+    fecha.sumar_dias(1);
+
+    assert_eq!(fecha.dia, 1);
+    assert_eq!(fecha.mes, 1);
+    assert_eq!(fecha.año, 2025);
 }
 
 #[test]
 fn test_restar_dias() {
-    //TODO: Hacer
+    let mut fecha = Fecha::new(31, 12, 2024);
+    fecha.restar_dias(365);
+
+    assert_eq!(fecha.dia, 1);
+    assert_eq!(fecha.mes, 1);
+    assert_eq!(fecha.año, 2024);
+
+    fecha.restar_dias(1);
+
+    assert_eq!(fecha.dia, 31);
+    assert_eq!(fecha.mes, 12);
+    assert_eq!(fecha.año, 2023);
 }

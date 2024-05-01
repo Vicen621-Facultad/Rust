@@ -4,8 +4,7 @@ struct Examen {
 }
 
 impl Examen {
-    fn new(materia: &str, nota: f32) -> Examen {
-        let materia = materia.to_owned();
+    fn new(materia: String, nota: f32) -> Examen {
         Examen {
             materia,
             nota
@@ -67,12 +66,12 @@ impl Estudiante {
 #[test]
 fn test_obtener_promedio() {
     let examenes = vec![
-        Examen::new("CADP", 8.0), 
-        Examen::new("OC", 6.0), 
-        Examen::new("Mate1", 10.0),
-        Examen::new("Taller", 8.0),
-        Examen::new("Mate2", 10.0),
-        Examen::new("Arqui", 8.0),
+        Examen::new(String::from("CADP"), 8.0), 
+        Examen::new(String::from("OC"), 6.0), 
+        Examen::new(String::from("Mate1"), 10.0),
+        Examen::new(String::from("Taller"), 8.0),
+        Examen::new(String::from("Mate2"), 10.0),
+        Examen::new(String::from("Arqui"), 8.0),
     ];
     let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
 
@@ -82,12 +81,12 @@ fn test_obtener_promedio() {
 #[test]
 fn test_obtener_calificacion_mas_alta() {
     let examenes = vec![
-        Examen::new("CADP", 8.0), 
-        Examen::new("OC", 6.0), 
-        Examen::new("Mate1", 10.0),
-        Examen::new("Taller", 8.0),
-        Examen::new("Mate2", 10.0),
-        Examen::new("Arqui", 8.0),
+        Examen::new(String::from("CADP"), 8.0), 
+        Examen::new(String::from("OC"), 6.0), 
+        Examen::new(String::from("Mate1"), 10.0),
+        Examen::new(String::from("Taller"), 8.0),
+        Examen::new(String::from("Mate2"), 10.0),
+        Examen::new(String::from("Arqui"), 8.0),
     ];
     let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
 
@@ -97,12 +96,12 @@ fn test_obtener_calificacion_mas_alta() {
 #[test]
 fn test_obtener_calificacion_mas_baja() {
     let examenes = vec![
-        Examen::new("CADP", 8.0), 
-        Examen::new("OC", 6.0), 
-        Examen::new("Mate1", 10.0),
-        Examen::new("Taller", 8.0),
-        Examen::new("Mate2", 10.0),
-        Examen::new("Arqui", 8.0),
+        Examen::new(String::from("CADP"), 8.0), 
+        Examen::new(String::from("OC"), 6.0), 
+        Examen::new(String::from("Mate1"), 10.0),
+        Examen::new(String::from("Taller"), 8.0),
+        Examen::new(String::from("Mate2"), 10.0),
+        Examen::new(String::from("Arqui"), 8.0),
     ];
     let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
 

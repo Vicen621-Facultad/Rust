@@ -27,10 +27,7 @@ struct Auto {
 }
 
 impl Auto {
-    fn new(marca: &str, modelo: &str, año: u32, precio_bruto: f64, color: Color) -> Auto {
-        let marca = marca.to_owned();
-        let modelo = modelo.to_owned();
-
+    fn new(marca: String, modelo: String, año: u32, precio_bruto: f64, color: Color) -> Auto {
         Auto {
             marca,
             modelo,
@@ -58,7 +55,7 @@ impl Auto {
             descuento += 0.1
         }
 
-        if self.marca == "BMW" {
+        if self.marca == String::from("BMW") {
             recargo += 0.15;
         }
 
@@ -81,9 +78,7 @@ struct ConcesionarioAuto {
 }
 
 impl ConcesionarioAuto {
-    fn new(nombre: &str, direccion: &str, capacidad: u32) -> ConcesionarioAuto {
-        let nombre = nombre.to_owned();
-        let direccion = direccion.to_owned();
+    fn new(nombre: String, direccion: String, capacidad: u32) -> ConcesionarioAuto {
         let autos = Vec::with_capacity(capacidad as usize);
 
         ConcesionarioAuto {
@@ -123,7 +118,7 @@ impl ConcesionarioAuto {
 
         for i in 0..self.autos.len() {
             if self.autos.get(i).unwrap().compare(auto) {
-                opt = Some(self.autos.get(i).unwrap().to_owned())
+                opt = Some(self.autos.get(i).unwrap().clone())
             }
         }
 
@@ -133,8 +128,8 @@ impl ConcesionarioAuto {
 
 #[test]
 fn test_calcular_precio() {
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
-    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
+    let audi = Auto::new(String::from(String::from("Audi")), String::from(String::from("TT")), 2020, 20000.0, Color::Rojo);
+    let bmw = Auto::new(String::from("BMW"), String::from("M3 Classic"), 1999, 20000.0, Color::Azul);
 
     assert_eq!(audi.calcular_precio(), 25000.0);
     assert_eq!(bmw.calcular_precio(), 27000.0)
@@ -142,9 +137,9 @@ fn test_calcular_precio() {
 
 #[test]
 fn test_compare() {
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
-    let audi2 = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
-    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
+    let audi2 = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
+    let bmw = Auto::new(String::from("BMW"), String::from("M3 Classic"), 1999, 20000.0, Color::Azul);
 
     assert!(audi.compare(&audi2));
     assert!(audi2.compare(&audi));
@@ -154,12 +149,12 @@ fn test_compare() {
 
 #[test]
 fn test_agregar_auto() {
-    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
-    let audi2 = Auto::new("Audi", "TT", 2020, 20000.0, Color::Azul);
-    let bmw = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Azul);
-    let bmw2 = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Verde);
-    let bmw3 = Auto::new("BMW", "M3 Classic", 1999, 20000.0, Color::Negro);
+    let mut concesionaria = ConcesionarioAuto::new(String::from("test"), String::from("test"), 4);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
+    let audi2 = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Azul);
+    let bmw = Auto::new(String::from("BMW"), String::from("M3 Classic"), 1999, 20000.0, Color::Azul);
+    let bmw2 = Auto::new(String::from("BMW"), String::from("M3 Classic"), 1999, 20000.0, Color::Verde);
+    let bmw3 = Auto::new(String::from("BMW"), String::from("M3 Classic"), 1999, 20000.0, Color::Negro);
     assert!(concesionaria.agregar_auto(audi));
     assert!(concesionaria.agregar_auto(audi2));
     assert!(concesionaria.agregar_auto(bmw));
@@ -170,24 +165,24 @@ fn test_agregar_auto() {
 
 #[test]
 fn test_buscar_auto() {
-    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let mut concesionaria = ConcesionarioAuto::new(String::from("test"), String::from("test"), 4);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
 
     concesionaria.agregar_auto(audi);
 
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
     assert!(concesionaria.buscar_auto(&audi).is_some());
-    let audi_azul = Auto::new("Audi", "TT", 2020, 20000.0, Color::Azul);
+    let audi_azul = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Azul);
     assert!(concesionaria.buscar_auto(&audi_azul).is_none());
 }
 
 #[test]
 fn test_eliminar_auto() {
-    let mut concesionaria = ConcesionarioAuto::new("test", "test", 4);
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let mut concesionaria = ConcesionarioAuto::new(String::from("test"), String::from("test"), 4);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
 
     concesionaria.agregar_auto(audi);
-    let audi = Auto::new("Audi", "TT", 2020, 20000.0, Color::Rojo);
+    let audi = Auto::new(String::from("Audi"), String::from("TT"), 2020, 20000.0, Color::Rojo);
     concesionaria.eliminar_auto(&audi);
     assert_eq!(concesionaria.autos.len(), 0);
     assert!(concesionaria.buscar_auto(&audi).is_none());
