@@ -207,7 +207,6 @@ impl Biblioteca {
     }
 }
 
-//TODO: Hacer Tests
 #[cfg(test)]
 mod tests {
     use super::*;
