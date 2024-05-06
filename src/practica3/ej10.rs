@@ -34,6 +34,7 @@ impl Prestamo {
         }
     }
 
+    /// Devuelve true si y solo si la fecha actual es exclusivamente mayor que la fecha de vencimiento
     fn vencio(&self, fecha_actual: &Fecha) -> bool {
         self.estado == EstadoPrestamo::EnPrestamo && fecha_actual.es_mayor(&self.fecha_vencimiento)
     }
