@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use crate::practica3::ej3::Fecha;
+use super::ej3::Fecha;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone)]
 enum Animal {
