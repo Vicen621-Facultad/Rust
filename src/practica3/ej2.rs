@@ -24,20 +24,38 @@ impl Rectangulo {
     }
 }
 
-#[test]
-fn test_rectangulo() {
-    let rectangulo = Rectangulo::new(4, 10);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(rectangulo.calcular_area(), 40);
-    assert_eq!(rectangulo.calcular_perimetro(), 28);
-    assert!(!rectangulo.es_cuadrado());
-}
+    #[test]
+    fn test_new_rectangulo() {
+        let rectangulo = Rectangulo::new(5, 10);
+        
+        assert_eq!(rectangulo.longitud, 5);
+        assert_eq!(rectangulo.ancho, 10);
+    }
 
-#[test]
-fn test_cuadrado() {
-    let rectangulo = Rectangulo::new(10, 10);
+    #[test]
+    fn test_calcular_area() {
+        let rectangulo = Rectangulo::new(5, 10);
+        
+        assert_eq!(rectangulo.calcular_area(), 50);
+    }
 
-    assert_eq!(rectangulo.calcular_area(), 100);
-    assert_eq!(rectangulo.calcular_perimetro(), 40);
-    assert!(rectangulo.es_cuadrado());
+    #[test]
+    fn test_calcular_perimetro() {
+        let rectangulo = Rectangulo::new(5, 10);
+        
+        assert_eq!(rectangulo.calcular_perimetro(), 30);
+    }
+
+    #[test]
+    fn test_es_cuadrado() {
+        let rectangulo1 = Rectangulo::new(5, 10);
+        let rectangulo2 = Rectangulo::new(5, 5);
+        
+        assert!(!rectangulo1.es_cuadrado());
+        assert!(rectangulo2.es_cuadrado());
+    }
 }

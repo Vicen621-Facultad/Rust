@@ -99,32 +99,117 @@ impl ConcesionarioAuto {
     }
 
     fn eliminar_auto(&mut self, auto: &Auto) {
-        let mut index = -1;
-        for i in 0..self.autos.len() {
-            match self.autos.get(i) {
-                Some(auto_comp) => if auto_comp.compare(&auto) { index = i as i32; }
-                _ => {}
-            }
-        }
+        let position = self.autos.iter().position(|a| a.compare(auto));
 
-        if index != -1 {
-            self.autos.remove(index as usize);
+        if let Some(index) = position{
+            self.autos.remove(index);
         }
     }
 
-    //REVIEW: Preguntar si esta bien la manera de extraer en el opt despues del if
-    fn buscar_auto(&self, auto: &Auto) -> Option<Auto> {
-        let mut opt = None;
-
-        for i in 0..self.autos.len() {
-            if self.autos.get(i).unwrap().compare(auto) {
-                opt = Some(self.autos.get(i).unwrap().clone())
-            }
-        }
-
-        opt
+    fn buscar_auto(&self, auto: &Auto) -> Option<&Auto> {
+        self.autos.iter().find(|a| a.compare(auto))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_color_es_primario() {
+        assert!(Color::Rojo.es_primario());
+        assert!(!Color::Verde.es_primario());
+        assert!(Color::Azul.es_primario());
+        assert!(Color::Amarillo.es_primario());
+        assert!(!Color::Blanco.es_primario());
+        assert!(!Color::Negro.es_primario());
+    }
+
+    #[test]
+    fn test_new_auto() {
+        let auto = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+
+        assert_eq!(auto.marca, "Toyota");
+        assert_eq!(auto.modelo, "Corolla");
+        assert_eq!(auto.año, 2022);
+        assert_eq!(auto.precio_bruto, 25000.0);
+        assert_eq!(auto.color, Color::Azul);
+    }
+
+    #[test]
+    fn test_auto_compare() {
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto2 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto3 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
+
+        assert!(auto1.compare(&auto2));
+        assert!(!auto1.compare(&auto3));
+    }
+
+    //TODO: Ver porque falla este test
+    #[test]
+    fn test_auto_calcular_precio() {
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2000, 50000.0, Color::Rojo);
+        let auto3 = Auto::new("Ford".to_string(), "Fiesta".to_string(), 1999, 15000.0, Color::Verde);
+
+        assert_eq!(auto1.calcular_precio(), 31250.0);
+        assert_eq!(auto2.calcular_precio(), 70000.0);
+        assert_eq!(auto3.calcular_precio(), 12750.0);
+    }
+
+    #[test]
+    fn test_new_concesionario_auto() {
+        let concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 10);
+
+        assert_eq!(concesionario.nombre, "Autos Juan");
+        assert_eq!(concesionario.direccion, "Calle A");
+        assert_eq!(concesionario.capacidad, 10);
+        assert_eq!(concesionario.autos.len(), 0);
+    }
+
+    #[test]
+    fn test_agregar_auto() {
+        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
+
+        assert!(concesionario.agregar_auto(auto1.clone()));
+        assert!(concesionario.agregar_auto(auto2.clone()));
+        assert!(!concesionario.agregar_auto(auto1));
+    }
+
+    #[test]
+    fn test_eliminar_auto() {
+        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
+
+        concesionario.agregar_auto(auto1.clone());
+        concesionario.agregar_auto(auto2.clone());
+
+        concesionario.eliminar_auto(&auto1);
+
+        assert_eq!(concesionario.autos.len(), 1);
+        assert!(concesionario.autos[0].compare(&auto2));
+    }
+
+    #[test]
+    fn test_buscar_auto() {
+        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
+        let auto3 = Auto::new("BMW".to_string(), "M3 Classic".to_string(), 1999, 20000.0, Color::Negro);
+
+        concesionario.agregar_auto(auto1.clone());
+        concesionario.agregar_auto(auto2.clone());
+
+        assert!(concesionario.buscar_auto(&auto1).unwrap().compare(&auto1));
+        assert!(concesionario.buscar_auto(&auto2).unwrap().compare(&auto2));
+        assert!(concesionario.buscar_auto(&auto3).is_none())
+    }
+}
+
 
 #[test]
 fn test_calcular_precio() {

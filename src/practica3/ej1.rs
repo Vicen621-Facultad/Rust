@@ -31,14 +31,44 @@ impl Persona {
     }
 }
 
-#[test]
-fn test_persona() {
-    let mut persona = Persona::new("Vicente".to_string(), 18, None);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(persona.to_string(), "nombre: Vicente, edad: 18, direccion: Desconocida");
-    assert_eq!(persona.obtener_edad(), 18);
+    #[test]
+    fn test_new_persona() {
+        let persona = Persona::new("Juan".to_string(), 30, Some("Calle A".to_string()));
+        
+        assert_eq!(persona.nombre, "Juan");
+        assert_eq!(persona.edad, 30);
+        assert_eq!(persona.direccion, Some("Calle A".to_string()));
+    }
 
-    persona.actualizar_direccion("Calle 7".to_string());
+    #[test]
+    fn test_to_string() {
+        let persona_con_direccion = Persona::new("Juan".to_string(), 30, Some("Calle A".to_string()));
+        let persona_sin_direccion = Persona::new("Ana".to_string(), 25, None);
+        
+        let persona_con_direccion_str = persona_con_direccion.to_string();
+        let persona_sin_direccion_str = persona_sin_direccion.to_string();
+        
+        assert_eq!(persona_con_direccion_str, "nombre: Juan, edad: 30, direccion: Calle A");
+        assert_eq!(persona_sin_direccion_str, "nombre: Ana, edad: 25, direccion: Desconocida");
+    }
 
-    assert_eq!(persona.to_string(), "nombre: Vicente, edad: 18, direccion: Calle 7");
+    #[test]
+    fn test_obtener_edad() {
+        let persona = Persona::new("Juan".to_string(), 30, Some("Calle A".to_string()));
+        
+        assert_eq!(persona.obtener_edad(), 30);
+    }
+
+    #[test]
+    fn test_actualizar_direccion() {
+        let mut persona = Persona::new("Juan".to_string(), 30, Some("Calle A".to_string()));
+        
+        persona.actualizar_direccion("Calle B".to_string());
+        
+        assert_eq!(persona.direccion, Some("Calle B".to_string()));
+    }
 }

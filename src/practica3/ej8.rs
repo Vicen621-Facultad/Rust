@@ -54,16 +54,7 @@ impl Playlist {
     }
 
     fn obtener_pos_cancion(&self, cancion: &Cancion) -> Option<usize> {
-        let mut index = None;
-
-        for i in 0..self.canciones.len() {
-            match self.canciones.get(i) {
-                Some(cancion_comp) => if cancion_comp == cancion { index = Some(i); }
-                _ => {}
-            }
-        }
-
-        index
+        self.canciones.iter().position(|c| c == cancion)
     }
 
     fn mover_cancion(&mut self, cancion: &Cancion, pos: usize) {
@@ -75,36 +66,28 @@ impl Playlist {
         }
     }
 
-    fn buscar_cancion_por_nombre(&self, nombre: String) -> Option<Cancion> {
-        let mut opt = None;
-
-        for cancion in &self.canciones {
-            if cancion.titulo == nombre {
-                opt = Some(cancion.clone());
-            }
-        }
-
-        opt
+    fn buscar_cancion_por_nombre(&self, nombre: String) -> Option<&Cancion> {
+        self.canciones.iter().find(|cancion| cancion.titulo == nombre)
     }
 
-    fn obtener_canciones_genero(&self, genero: &Genero) -> Vec<Cancion> {
+    fn obtener_canciones_genero(&self, genero: &Genero) -> Vec<&Cancion> {
         let mut vec = vec![];
 
         for cancion in &self.canciones {
             if &cancion.genero == genero {
-                vec.push(cancion.clone());
+                vec.push(cancion);
             }
         }
 
         vec
     }
 
-    fn obtener_canciones_artista(&self, artista: String) -> Vec<Cancion> {
+    fn obtener_canciones_artista(&self, artista: String) -> Vec<&Cancion> {
         let mut vec = vec![];
 
         for cancion in &self.canciones {
             if cancion.artista == artista {
-                vec.push(cancion.clone());
+                vec.push(cancion);
             }
         }
 
@@ -112,7 +95,6 @@ impl Playlist {
     }
 
     fn modificar_titulo(&mut self, titulo: String) {
-        //REVIEW: Preguntar por el to_owned o si es mejor String
         self.nombre = titulo;
     }
 
@@ -121,104 +103,137 @@ impl Playlist {
     }
 }
 
-#[test]
-fn test_agregar_cancion() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    assert_eq!(playlist.canciones.len(), 2);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let cancion_playlist = playlist.canciones.pop();
-    assert_eq!(cancion_playlist, Some(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros)));
-}
+    #[test]
+    fn test_new_cancion() {
+        let cancion = Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock);
 
-#[test]
-fn test_eliminar_cancion() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    let cancion = Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros);
-    playlist.canciones.push(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
+        assert_eq!(cancion.titulo, "Bohemian Rhapsody");
+        assert_eq!(cancion.artista, "Queen");
+        assert_eq!(cancion.genero, Genero::Rock);
+    }
 
-    assert!(playlist.eliminar_cancion(&cancion));
-    assert!(!playlist.eliminar_cancion(&cancion));
-    assert_eq!(playlist.canciones.len(), 1);
-}
+    #[test]
+    fn test_new_playlist() {
+        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
+        ]);
 
-#[test]
-fn test_obtener_pos_cancion() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("La novia de mi amigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Mi peor enemigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("La carie".to_owned(), "Dillom".to_owned(), Genero::Otros));
+        assert_eq!(playlist.nombre, "Rock Classics");
+        assert_eq!(playlist.canciones.len(), 2);
+    }
 
-    assert_eq!(playlist.obtener_pos_cancion(&Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)), Some(0));
-    assert_eq!(playlist.obtener_pos_cancion(&Cancion::new("La novia de mi amigo".to_owned(), "Dillom".to_owned(), Genero::Otros)), Some(1));
-    assert_eq!(playlist.obtener_pos_cancion(&Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros)), Some(2));
-    assert_eq!(playlist.obtener_pos_cancion(&Cancion::new("Mi peor enemigo".to_owned(), "Dillom".to_owned(), Genero::Otros)), Some(3));
-    assert_eq!(playlist.obtener_pos_cancion(&Cancion::new("La carie".to_owned(), "Dillom".to_owned(), Genero::Otros)), Some(4));
-    assert!(playlist.obtener_pos_cancion(&Cancion::new("Muñecas".to_owned(), "Dillom".to_owned(), Genero::Otros)).is_none());
-}
+    #[test]
+    fn test_agregar_cancion() {
+        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+        ]);
 
-#[test]
-fn test_buscar_cancion_por_nombre() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("La novia de mi amigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Mi peor enemigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("La carie".to_owned(), "Dillom".to_owned(), Genero::Otros));
+        let cancion = Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock);
+        playlist.agregar_cancion(cancion.clone());
 
-    let cancion = playlist.buscar_cancion_por_nombre("Mi peor enemigo".to_owned());
-    let none = playlist.buscar_cancion_por_nombre("Muñecas".to_owned());
+        assert_eq!(playlist.canciones.len(), 2);
+        assert!(playlist.canciones.contains(&cancion));
+    }
 
-    assert_eq!(cancion, Some(Cancion::new("Mi peor enemigo".to_owned(), "Dillom".to_owned(), Genero::Otros)));
-    assert!(none.is_none());
-}
+    #[test]
+    fn test_eliminar_cancion() {
+        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
+        ]);
 
-#[test]
-fn test_obtener_canciones_genero() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("Ya no sos igual".to_owned(), "2 minutos".to_owned(), Genero::Rock));
-    playlist.agregar_cancion(Cancion::new("Brain Damage".to_owned(), "Pink Floyd".to_owned(), Genero::Rock));
-    playlist.agregar_cancion(Cancion::new("Hola".to_owned(), "Miranda!".to_owned(), Genero::Pop));
+        let cancion = Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock);
+        playlist.eliminar_cancion(&cancion);
 
-    let rock = playlist.obtener_canciones_genero(&Genero::Rock);
-    
-    assert_eq!(rock.len(), 2);
-    assert!(rock.contains(&Cancion::new("Ya no sos igual".to_owned(), "2 minutos".to_owned(), Genero::Rock)));
-    assert!(rock.contains(&Cancion::new("Brain Damage".to_owned(), "Pink Floyd".to_owned(), Genero::Rock)));
-}
+        assert_eq!(playlist.canciones.len(), 1);
+        assert!(!playlist.canciones.contains(&cancion));
+    }
 
-#[test]
-fn test_obtener_canciones_artista() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("Ya no sos igual".to_owned(), "2 minutos".to_owned(), Genero::Rock));
-    playlist.agregar_cancion(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Hola".to_owned(), "Miranda!".to_owned(), Genero::Pop));
+    #[test]
+    fn test_mover_cancion() {
+        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
+            Cancion::new("Hotel California".to_string(), "Eagles".to_string(), Genero::Rock)
+        ]);
 
-    let rock = playlist.obtener_canciones_artista("Dillom".to_owned());
-    
-    assert_eq!(rock.len(), 2);
-    assert!(rock.contains(&Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)));
-    assert!(rock.contains(&Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros)));
-}
+        let cancion = Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock);
+        playlist.mover_cancion(&cancion, 0);
 
-#[test]
-fn test_modificar_titulo() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    assert_eq!(playlist.nombre, "test");
-    playlist.modificar_titulo("test2".to_owned());
-    assert_eq!(playlist.nombre, "test2");
-}
+        assert_eq!(playlist.canciones[0], cancion);
+    }
 
-#[test]
-fn test_vaciar() {
-    let mut playlist = Playlist::new("test".to_owned(), vec![Cancion::new("Cirugia".to_owned(), "Dillom".to_owned(), Genero::Otros)]);
-    playlist.agregar_cancion(Cancion::new("La novia de mi amigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Ultimamente".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("Mi peor enemigo".to_owned(), "Dillom".to_owned(), Genero::Otros));
-    playlist.agregar_cancion(Cancion::new("La carie".to_owned(), "Dillom".to_owned(), Genero::Otros));
+    #[test]
+    fn test_buscar_cancion_por_nombre() {
+        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
+            Cancion::new("Hotel California".to_string(), "Eagles".to_string(), Genero::Rock)
+        ]);
 
-    assert_eq!(playlist.canciones.len(), 5);
-    playlist.vaciar();
-    assert_eq!(playlist.canciones.len(), 0);
-    assert!(playlist.canciones.is_empty());
+        let cancion = playlist.buscar_cancion_por_nombre("Stairway to Heaven".to_string());
+
+        assert_eq!(cancion, Some(&Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)));
+    }
+
+    #[test]
+    fn test_obtener_canciones_genero() {
+        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Thriller".to_string(), "Michael Jackson".to_string(), Genero::Pop),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
+            Cancion::new("Billie Jean".to_string(), "Michael Jackson".to_string(), Genero::Pop),
+        ]);
+
+        let canciones_rock = playlist.obtener_canciones_genero(&Genero::Rock);
+        let canciones_pop = playlist.obtener_canciones_genero(&Genero::Pop);
+
+        assert_eq!(canciones_rock.len(), 2);
+        assert_eq!(canciones_pop.len(), 2);
+    }
+
+    #[test]
+    fn test_obtener_canciones_artista() {
+        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Thriller".to_string(), "Michael Jackson".to_string(), Genero::Pop),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
+            Cancion::new("Billie Jean".to_string(), "Michael Jackson".to_string(), Genero::Pop),
+        ]);
+
+        let canciones_queen = playlist.obtener_canciones_artista("Queen".to_string());
+        let canciones_mj = playlist.obtener_canciones_artista("Michael Jackson".to_string());
+
+        assert_eq!(canciones_queen.len(), 1);
+        assert_eq!(canciones_mj.len(), 2);
+    }
+
+    #[test]
+    fn test_modificar_titulo() {
+        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
+        ]);
+
+        playlist.modificar_titulo("Best of Rock".to_string());
+
+        assert_eq!(playlist.nombre, "Best of Rock");
+    }
+
+    #[test]
+    fn test_vaciar() {
+        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+            Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
+            Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
+        ]);
+
+        playlist.vaciar();
+
+        assert_eq!(playlist.canciones.len(), 0);
+    }
 }

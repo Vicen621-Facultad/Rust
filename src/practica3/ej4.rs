@@ -24,9 +24,9 @@ impl Triangulo {
         if self.lado1 == self.lado2 && self.lado2 == self.lado3 {
             TipoTriangulo::Equilatero
         } else if self.lado1 == self.lado2 || self.lado1 == self.lado3 || self.lado2 == self.lado3 {
-            TipoTriangulo::Escaleno
-        } else {
             TipoTriangulo::Isoceles
+        } else {
+            TipoTriangulo::Escaleno
         }
     }
 
@@ -42,27 +42,51 @@ impl Triangulo {
     }
 }
 
-#[test]
-fn test_determinar_tipo() {
-    let escaleno = Triangulo::new(4, 7, 7);
-    let equilatero = Triangulo::new(4, 4, 4);
-    let isoceles = Triangulo::new(4, 6, 7);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(escaleno.determinar_tipo(), TipoTriangulo::Escaleno);
-    assert_eq!(equilatero.determinar_tipo(), TipoTriangulo::Equilatero);
-    assert_eq!(isoceles.determinar_tipo(), TipoTriangulo::Isoceles);
-}
+    #[test]
+    fn test_new_triangulo() {
+        let triangulo = Triangulo::new(3, 4, 5);
+        
+        assert_eq!(triangulo.lado1, 3);
+        assert_eq!(triangulo.lado2, 4);
+        assert_eq!(triangulo.lado3, 5);
+    }
 
-#[test]
-fn test_calcular_area() {
-    let triangulo = Triangulo::new(2, 3, 4);
+    #[test]
+    fn test_determinar_tipo_equilatero() {
+        let triangulo = Triangulo::new(5, 5, 5);
+        
+        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Equilatero);
+    }
 
-    assert_eq!(triangulo.calcular_area(), 2.9047375096555625);
-}
+    #[test]
+    fn test_determinar_tipo_isoceles() {
+        let triangulo = Triangulo::new(5, 5, 3);
+        
+        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Isoceles);
+    }
 
-#[test]
-fn test_calcular_perimtetro() {
-    let triangulo = Triangulo::new(3, 8, 5);
+    #[test]
+    fn test_determinar_tipo_escaleno() {
+        let triangulo = Triangulo::new(3, 4, 5);
+        
+        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Escaleno);
+    }
 
-    assert_eq!(triangulo.caluclar_perimetro(), 16);
+    #[test]
+    fn test_calcular_area() {
+        let triangulo = Triangulo::new(3, 4, 5);
+        
+        assert_eq!(triangulo.calcular_area(), 6.0);
+    }
+
+    #[test]
+    fn test_calcular_perimetro() {
+        let triangulo = Triangulo::new(3, 4, 5);
+        
+        assert_eq!(triangulo.caluclar_perimetro(), 12);
+    }
 }

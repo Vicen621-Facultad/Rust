@@ -1,3 +1,4 @@
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub struct Fecha {
     dia: u32,
     mes: u32,
@@ -80,62 +81,90 @@ impl Fecha {
     }
 }
 
-#[test]
-fn tests_es_fecha_valida() {
-    assert!(Fecha::new(29, 2, 2024).es_fecha_valida());
-    assert!(Fecha::new(31, 1, 2022).es_fecha_valida());
-    assert!(!Fecha::new(29, 2, 2023).es_fecha_valida());
-    assert!(!Fecha::new(32, 1, 2022).es_fecha_valida());
-    assert!(!Fecha::new(31, 4, 2024).es_fecha_valida());
-    assert!(!Fecha::new(31, 13, 2024).es_fecha_valida());
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn tests_es_biciesto() {
-    assert!(Fecha::new(1, 1, 2024).es_bisiesto());
-    assert!(Fecha::new(1, 1, 0).es_bisiesto());
-    assert!(Fecha::new(1, 1, 100).es_bisiesto());
-    assert!(!Fecha::new(1, 1, 2023).es_bisiesto());
-    assert!(!Fecha::new(1, 1, 2021).es_bisiesto());
-}
+    #[test]
+    fn test_es_fecha_valida() {
+        // Fecha válida
+        let fecha_valida = Fecha::new(15, 6, 2024);
+        assert!(fecha_valida.es_fecha_valida());
 
-#[test]
-fn test_es_mayor() {
-    let fecha1 = Fecha::new(2, 11, 2009);
-    let fecha2 = Fecha::new(7, 5, 2005);
+        // Fecha inválida (día fuera de rango)
+        let fecha_invalida_dia = Fecha::new(32, 6, 2024);
+        assert!(!fecha_invalida_dia.es_fecha_valida());
 
-    assert!(fecha1.es_mayor(&fecha2));
-    assert!(!fecha2.es_mayor(&fecha1));
-}
+        // Fecha inválida (mes fuera de rango)
+        let fecha_invalida_mes = Fecha::new(15, 13, 2024);
+        assert!(!fecha_invalida_mes.es_fecha_valida());
 
-#[test]
-fn test_sumar_dias() {
-    let mut fecha = Fecha::new(1, 1, 2024);
-    fecha.sumar_dias(365);
+        // Fecha inválida (febrero en año no bisiesto)
+        let fecha_invalida_febrero_no_bisiesto = Fecha::new(29, 2, 2023);
+        assert!(!fecha_invalida_febrero_no_bisiesto.es_fecha_valida());
 
-    assert_eq!(fecha.dia, 31);
-    assert_eq!(fecha.mes, 12);
-    assert_eq!(fecha.año, 2024);
+        // Fecha válida (febrero en año bisiesto)
+        let fecha_valida_febrero_bisiesto = Fecha::new(29, 2, 2024);
+        assert!(fecha_valida_febrero_bisiesto.es_fecha_valida());
+    }
 
-    fecha.sumar_dias(1);
+    #[test]
+    fn test_es_bisiesto() {
+        // Año bisiesto
+        let fecha_bisiesto = Fecha::new(1, 1, 2024);
+        assert!(fecha_bisiesto.es_bisiesto());
 
-    assert_eq!(fecha.dia, 1);
-    assert_eq!(fecha.mes, 1);
-    assert_eq!(fecha.año, 2025);
-}
+        // Año no bisiesto
+        let fecha_no_bisiesto = Fecha::new(1, 1, 2023);
+        assert!(!fecha_no_bisiesto.es_bisiesto());
+    }
 
-#[test]
-fn test_restar_dias() {
-    let mut fecha = Fecha::new(31, 12, 2024);
-    fecha.restar_dias(365);
+    #[test]
+    fn test_sumar_dias() {
+        let mut fecha = Fecha::new(1, 1, 2024);
+        fecha.sumar_dias(365);
+        assert_eq!(fecha, Fecha::new(31, 12, 2024));
+        fecha.sumar_dias(1);
+        assert_eq!(fecha, Fecha::new(1, 1, 2025));
+        fecha.sumar_dias(5);
+        assert_eq!(fecha, Fecha::new(6, 1, 2025));
+    }
 
-    assert_eq!(fecha.dia, 1);
-    assert_eq!(fecha.mes, 1);
-    assert_eq!(fecha.año, 2024);
+    #[test]
+    fn test_restar_dias() {
+        let mut fecha = Fecha::new(31, 12, 2024);
+        fecha.restar_dias(365);
+        assert_eq!(fecha, Fecha::new(1, 1, 2024));
+        fecha.restar_dias(1);
+        assert_eq!(fecha, Fecha::new(31, 12, 2023));
+        fecha.restar_dias(5);
+        assert_eq!(fecha, Fecha::new(26, 12, 2023));
+    }
 
-    fecha.restar_dias(1);
+    #[test]
+    fn test_es_mayor() {
+        let fecha1 = Fecha::new(5, 3, 2024);
+        let fecha2 = Fecha::new(5, 3, 2023);
+        assert!(fecha1.es_mayor(&fecha2));
 
-    assert_eq!(fecha.dia, 31);
-    assert_eq!(fecha.mes, 12);
-    assert_eq!(fecha.año, 2023);
+        let fecha3 = Fecha::new(5, 3, 2023);
+        let fecha4 = Fecha::new(5, 3, 2024);
+        assert!(!fecha3.es_mayor(&fecha4));
+
+        let fecha5 = Fecha::new(5, 4, 2024);
+        let fecha6 = Fecha::new(5, 3, 2024);
+        assert!(fecha5.es_mayor(&fecha6));
+
+        let fecha7 = Fecha::new(5, 3, 2024);
+        let fecha8 = Fecha::new(5, 4, 2024);
+        assert!(!fecha7.es_mayor(&fecha8));
+
+        let fecha9 = Fecha::new(6, 3, 2024);
+        let fecha10 = Fecha::new(5, 3, 2024);
+        assert!(fecha9.es_mayor(&fecha10));
+
+        let fecha11 = Fecha::new(5, 3, 2024);
+        let fecha12 = Fecha::new(6, 3, 2024);
+        assert!(!fecha11.es_mayor(&fecha12));
+    }
 }

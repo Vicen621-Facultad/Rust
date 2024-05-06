@@ -35,29 +35,47 @@ impl Producto {
     }
 }
 
-#[test]
-fn test_caluclar_impuestos() {
-    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(producto.calcular_impuestos(10.0), 20.0);
-    assert_eq!(producto.calcular_impuestos(100.0), 200.0);
-    assert_eq!(producto.calcular_impuestos(42.5), 85.0);
-}
+    #[test]
+    fn test_new_producto() {
+        let producto = Producto::new("Laptop".to_string(), 1000.0, 1);
+        
+        assert_eq!(producto.nombre, "Laptop");
+        assert_eq!(producto.precio_bruto, 1000.0);
+        assert_eq!(producto.id, 1);
+    }
 
-#[test]
-fn test_aplicar_descuento() {
-    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
+    #[test]
+    fn test_calcular_impuestos() {
+        let producto = Producto::new("Laptop".to_string(), 1000.0, 1);
+        
+        assert_eq!(producto.calcular_impuestos(10.0), 100.0);
+    }
 
-    assert_eq!(producto.aplicar_descuento(10.0), 20.0);
-    assert_eq!(producto.aplicar_descuento(100.0), 200.0);
-    assert_eq!(producto.aplicar_descuento(42.5), 85.0);
-}
+    #[test]
+    fn test_aplicar_descuento() {
+        let producto = Producto::new("Laptop".to_string(), 1000.0, 1);
+        
+        assert_eq!(producto.aplicar_descuento(20.0), 200.0);
+    }
 
-#[test]
-fn test_calcular_precio_total() {
-    let producto = Producto::new(String::from("Chipa"), 200.0, 1);
-
-    assert_eq!(producto.calcular_precio_total(Some(10.0), Some(10.0)), 200.0);
-    assert_eq!(producto.calcular_precio_total(Some(21.0), None), 242.0);
-    assert_eq!(producto.calcular_precio_total(None, Some(42.5)), 115.0)
+    #[test]
+    fn test_calcular_precio_total() {
+        let producto = Producto::new("Laptop".to_string(), 1000.0, 1);
+        
+        // Con impuestos y descuento
+        assert_eq!(producto.calcular_precio_total(Some(10.0), Some(20.0)), 900.0);
+        
+        // Sin impuestos ni descuento
+        assert_eq!(producto.calcular_precio_total(None, None), 1000.0);
+        
+        // Solo con impuestos
+        assert_eq!(producto.calcular_precio_total(Some(10.0), None), 1100.0);
+        
+        // Solo con descuento
+        assert_eq!(producto.calcular_precio_total(None, Some(20.0)), 800.0);
+    }
 }

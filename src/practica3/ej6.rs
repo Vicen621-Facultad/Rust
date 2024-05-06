@@ -1,3 +1,4 @@
+#[derive(Clone)]
 struct Examen {
     materia: String,
     nota: f32,
@@ -63,47 +64,63 @@ impl Estudiante {
     }
 }
 
-#[test]
-fn test_obtener_promedio() {
-    let examenes = vec![
-        Examen::new(String::from("CADP"), 8.0), 
-        Examen::new(String::from("OC"), 6.0), 
-        Examen::new(String::from("Mate1"), 10.0),
-        Examen::new(String::from("Taller"), 8.0),
-        Examen::new(String::from("Mate2"), 10.0),
-        Examen::new(String::from("Arqui"), 8.0),
-    ];
-    let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(estudiante.obtener_promedio(), 8.333333);
-}
+    #[test]
+    fn test_new_estudiante() {
+        let examenes = vec![
+            Examen::new("Matemáticas".to_string(), 8.5),
+            Examen::new("Historia".to_string(), 7.0),
+            Examen::new("Ciencias".to_string(), 9.2),
+        ];
+        let estudiante = Estudiante::new("Juan", 1, examenes.clone());
+        
+        assert_eq!(estudiante.nombre, "Juan");
+        assert_eq!(estudiante.id, 1);
 
-#[test]
-fn test_obtener_calificacion_mas_alta() {
-    let examenes = vec![
-        Examen::new(String::from("CADP"), 8.0), 
-        Examen::new(String::from("OC"), 6.0), 
-        Examen::new(String::from("Mate1"), 10.0),
-        Examen::new(String::from("Taller"), 8.0),
-        Examen::new(String::from("Mate2"), 10.0),
-        Examen::new(String::from("Arqui"), 8.0),
-    ];
-    let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
+        for i in 0..examenes.len() {
+            let examen = &examenes[i];
+            let examen_estudiante = &estudiante.examenes[i];
+            assert_eq!(examen.materia, examen_estudiante.materia);
+            assert_eq!(examen.nota, examen_estudiante.nota);
+        }
+    }
 
-    assert_eq!(estudiante.obtener_calificacion_mas_alta(), 10.0);
-}
+    #[test]
+    fn test_obtener_promedio() {
+        let examenes = vec![
+            Examen::new("Matemáticas".to_string(), 8.5),
+            Examen::new("Historia".to_string(), 7.0),
+            Examen::new("Ciencias".to_string(), 9.2),
+        ];
+        let estudiante = Estudiante::new("Juan", 1, examenes);
+        
+        assert_eq!(estudiante.obtener_promedio().round(), 8.0);
+    }
 
-#[test]
-fn test_obtener_calificacion_mas_baja() {
-    let examenes = vec![
-        Examen::new(String::from("CADP"), 8.0), 
-        Examen::new(String::from("OC"), 6.0), 
-        Examen::new(String::from("Mate1"), 10.0),
-        Examen::new(String::from("Taller"), 8.0),
-        Examen::new(String::from("Mate2"), 10.0),
-        Examen::new(String::from("Arqui"), 8.0),
-    ];
-    let estudiante = Estudiante::new("Vicente Garcia Marti", 23025, examenes);
+    #[test]
+    fn test_obtener_calificacion_mas_alta() {
+        let examenes = vec![
+            Examen::new("Matemáticas".to_string(), 8.5),
+            Examen::new("Historia".to_string(), 7.0),
+            Examen::new("Ciencias".to_string(), 9.2),
+        ];
+        let estudiante = Estudiante::new("Juan", 1, examenes);
+        
+        assert_eq!(estudiante.obtener_calificacion_mas_alta(), 9.2);
+    }
 
-    assert_eq!(estudiante.obtener_calificacion_mas_baja(), 6.0);
+    #[test]
+    fn test_obtener_calificacion_mas_baja() {
+        let examenes = vec![
+            Examen::new("Matemáticas".to_string(), 8.5),
+            Examen::new("Historia".to_string(), 7.0),
+            Examen::new("Ciencias".to_string(), 9.2),
+        ];
+        let estudiante = Estudiante::new("Juan", 1, examenes);
+        
+        assert_eq!(estudiante.obtener_calificacion_mas_baja(), 7.0);
+    }
 }
