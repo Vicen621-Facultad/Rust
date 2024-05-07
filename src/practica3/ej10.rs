@@ -4,6 +4,7 @@ use super::ej3::Fecha;
 struct Biblioteca {
     nombre: String,
     direccion: String,
+    // key: libro.isbn, value: cant de ese libro
     libros: HashMap<u32, u32>,
     prestamos: Vec<Prestamo>,
 }
