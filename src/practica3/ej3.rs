@@ -1,17 +1,27 @@
-#[derive(Eq, PartialEq, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Fecha {
     dia: u32,
     mes: u32,
-    año: u32,
+    anio: u32,
 }
 
 impl Fecha {
-    pub fn new(dia: u32, mes: u32, año: u32) -> Fecha {
+    pub fn new(dia: u32, mes: u32, anio: u32) -> Fecha {
         Fecha {
             dia,
             mes,
-            año,
+            anio,
         }
+    }
+
+    pub fn to_string(&self) -> String {
+        let mut result = String::new();
+        result.push_str(&format!("{}/{}/{}", self.dia, self.mes, self.anio));
+        result
+    }
+
+    pub fn equals(&self, other: &Fecha) -> bool {
+        self.to_string() == other.to_string()
     }
 
     pub fn es_fecha_valida(&self) -> bool {
@@ -19,7 +29,7 @@ impl Fecha {
     }
 
     pub fn es_bisiesto(&self) -> bool {
-        self.año % 4 == 0
+        self.anio % 4 == 0
     }
 
     /// Devuelve la cantidad de dias que tiene el mes actual
@@ -49,7 +59,7 @@ impl Fecha {
                 self.mes += 1;
                 if self.mes > 12 {
                     self.mes = 1;
-                    self.año += 1;
+                    self.anio += 1;
                 }
                 self.dia = 1;
             }
@@ -67,7 +77,7 @@ impl Fecha {
                 self.mes -= 1;
                 if self.mes == 0 {
                     self.mes = 12;
-                    self.año -= 1;
+                    self.anio -= 1;
                 }
                 self.dia = self.obtener_dias_para_mes();
             }
@@ -75,9 +85,9 @@ impl Fecha {
     }
 
     pub fn es_mayor(&self, una_fecha: &Fecha) -> bool {
-        (self.año > una_fecha.año) || 
-            (self.año == una_fecha.año && self.mes > una_fecha.mes) || 
-            (self.año == una_fecha.año && self.mes == una_fecha.mes && self.dia > una_fecha.dia)
+        (self.anio > una_fecha.anio) || 
+            (self.anio == una_fecha.anio && self.mes > una_fecha.mes) || 
+            (self.anio == una_fecha.anio && self.mes == una_fecha.mes && self.dia > una_fecha.dia)
     }
 }
 
@@ -99,22 +109,22 @@ mod tests {
         let fecha_invalida_mes = Fecha::new(15, 13, 2024);
         assert!(!fecha_invalida_mes.es_fecha_valida());
 
-        // Fecha inválida (febrero en año no bisiesto)
+        // Fecha inválida (febrero en anio no bisiesto)
         let fecha_invalida_febrero_no_bisiesto = Fecha::new(29, 2, 2023);
         assert!(!fecha_invalida_febrero_no_bisiesto.es_fecha_valida());
 
-        // Fecha válida (febrero en año bisiesto)
+        // Fecha válida (febrero en anio bisiesto)
         let fecha_valida_febrero_bisiesto = Fecha::new(29, 2, 2024);
         assert!(fecha_valida_febrero_bisiesto.es_fecha_valida());
     }
 
     #[test]
     fn test_es_bisiesto() {
-        // Año bisiesto
+        // Anio bisiesto
         let fecha_bisiesto = Fecha::new(1, 1, 2024);
         assert!(fecha_bisiesto.es_bisiesto());
 
-        // Año no bisiesto
+        // Anio no bisiesto
         let fecha_no_bisiesto = Fecha::new(1, 1, 2023);
         assert!(!fecha_no_bisiesto.es_bisiesto());
     }
@@ -123,22 +133,22 @@ mod tests {
     fn test_sumar_dias() {
         let mut fecha = Fecha::new(1, 1, 2024);
         fecha.sumar_dias(365);
-        assert_eq!(fecha, Fecha::new(31, 12, 2024));
+        assert!(fecha.equals(&Fecha::new(31, 12, 2024)));
         fecha.sumar_dias(1);
-        assert_eq!(fecha, Fecha::new(1, 1, 2025));
+        assert!(fecha.equals(&Fecha::new(1, 1, 2025)));
         fecha.sumar_dias(5);
-        assert_eq!(fecha, Fecha::new(6, 1, 2025));
+        assert!(fecha.equals(&Fecha::new(6, 1, 2025)));
     }
 
     #[test]
     fn test_restar_dias() {
         let mut fecha = Fecha::new(31, 12, 2024);
         fecha.restar_dias(365);
-        assert_eq!(fecha, Fecha::new(1, 1, 2024));
+        assert!(fecha.equals(&Fecha::new(1, 1, 2024)));
         fecha.restar_dias(1);
-        assert_eq!(fecha, Fecha::new(31, 12, 2023));
+        assert!(fecha.equals(&Fecha::new(31, 12, 2023)));
         fecha.restar_dias(5);
-        assert_eq!(fecha, Fecha::new(26, 12, 2023));
+        assert!(fecha.equals(&Fecha::new(26, 12, 2023)));
     }
 
     #[test]

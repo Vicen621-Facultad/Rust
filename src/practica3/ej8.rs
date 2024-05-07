@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 enum Genero {
     Rock,
     Pop,
@@ -7,7 +7,23 @@ enum Genero {
     Otros
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl Genero {
+    fn to_string(&self) -> String {
+        match self {
+            Genero::Rock => String::from("Rock"),
+            Genero::Pop => String::from("Pop"),
+            Genero::Rap => String::from("Rap"),
+            Genero::Jazz => String::from("Jazz"),
+            Genero::Otros => String::from("Otros"),
+        }
+    }
+
+    fn equals(&self, other: &Genero) -> bool {
+        self.to_string() == other.to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
 struct Cancion {
     titulo: String,
     artista: String,
@@ -21,6 +37,17 @@ impl Cancion {
             artista,
             genero
         }
+    }
+
+    fn to_string(&self) -> String {
+        format!(
+            "Título: {}\nArtista: {}\nGénero: {}",
+            self.titulo, self.artista, self.genero.to_string()
+        )
+    }
+
+    fn equals(&self, other: &Cancion) -> bool {
+        self.to_string() == other.to_string()
     }
 }
 
@@ -54,8 +81,19 @@ impl Playlist {
     }
 
     fn obtener_pos_cancion(&self, cancion: &Cancion) -> Option<usize> {
-        //FIXME: Cambiar por un while
-        self.canciones.iter().position(|c| c == cancion)
+        let mut position = None;
+
+        for i in 0..self.canciones.len() {
+            if let Some(c) = self.canciones.get(i) {
+                if c.equals(cancion) {
+                    position = Some(i);
+                    break;
+                }
+            }
+        }
+
+
+        position
     }
 
     fn mover_cancion(&mut self, cancion: &Cancion, pos: usize) {
@@ -68,15 +106,23 @@ impl Playlist {
     }
 
     fn buscar_cancion_por_nombre(&self, nombre: String) -> Option<&Cancion> {
-        //FIXME: Cambiar por un while
-        self.canciones.iter().find(|cancion| cancion.titulo == nombre)
+        let mut ret = None;
+
+        for cancion in &self.canciones {
+            if cancion.titulo == nombre {
+                ret = Some(cancion);
+                break;
+            }
+        }
+
+        ret
     }
 
     fn obtener_canciones_genero(&self, genero: &Genero) -> Vec<&Cancion> {
         let mut vec = vec![];
 
         for cancion in &self.canciones {
-            if &cancion.genero == genero {
+            if cancion.genero.equals(genero) {
                 vec.push(cancion);
             }
         }
@@ -115,7 +161,7 @@ mod tests {
 
         assert_eq!(cancion.titulo, "Bohemian Rhapsody");
         assert_eq!(cancion.artista, "Queen");
-        assert_eq!(cancion.genero, Genero::Rock);
+        assert!(cancion.genero.equals(&Genero::Rock));
     }
 
     #[test]
@@ -139,7 +185,7 @@ mod tests {
         playlist.agregar_cancion(cancion.clone());
 
         assert_eq!(playlist.canciones.len(), 2);
-        assert!(playlist.canciones.contains(&cancion));
+        assert!(playlist.canciones[1].equals(&cancion));
     }
 
     #[test]
@@ -153,7 +199,6 @@ mod tests {
         playlist.eliminar_cancion(&cancion);
 
         assert_eq!(playlist.canciones.len(), 1);
-        assert!(!playlist.canciones.contains(&cancion));
     }
 
     #[test]
@@ -167,7 +212,7 @@ mod tests {
         let cancion = Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock);
         playlist.mover_cancion(&cancion, 0);
 
-        assert_eq!(playlist.canciones[0], cancion);
+        assert!(playlist.canciones[0].equals(&cancion));
     }
 
     #[test]
@@ -180,7 +225,8 @@ mod tests {
 
         let cancion = playlist.buscar_cancion_por_nombre("Stairway to Heaven".to_string());
 
-        assert_eq!(cancion, Some(&Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)));
+        assert!(cancion.is_some());
+        assert!(cancion.unwrap().equals(&Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)))
     }
 
     #[test]

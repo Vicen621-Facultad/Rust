@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone)]
 enum Color {
     Rojo,
     Verde,
@@ -14,6 +14,21 @@ impl Color {
             Color::Rojo | Color::Azul | Color::Amarillo => true,
             _ => false
         }
+    }
+
+    fn to_string(&self) -> String {
+        match self {
+            Color::Rojo => String::from("rojo"),
+            Color::Verde => String::from("verde"),
+            Color::Azul => String::from("azul"),
+            Color::Amarillo => String::from("amarillo"),
+            Color::Blanco => String::from("blanco"),
+            Color::Negro => String::from("negro"),
+        }
+    }
+
+    fn equals(&self, other: &Color) -> bool {
+        self.to_string() == other.to_string()
     }
 }
 
@@ -37,12 +52,15 @@ impl Auto {
         }
     }
 
-    fn compare(&self, other: &Auto) -> bool {
-        self.modelo == other.modelo && 
-            self.marca == other.marca && 
-            self.año == other.año && 
-            self.color == other.color && 
-            self.precio_bruto == other.precio_bruto
+    fn to_string(&self) -> String {
+        format!(
+            "Marca: {}\nModelo: {}\nAño: {}\nPrecio Bruto: {}\nColor: {}",
+            self.marca, self.modelo, self.año, self.precio_bruto, self.color.to_string()
+        )
+    }
+
+    fn equals(&self, other: &Auto) -> bool {
+        self.to_string() == other.to_string()
     }
 
     fn calcular_precio(&self) -> f64 {
@@ -99,17 +117,34 @@ impl ConcesionarioAuto {
     }
 
     fn eliminar_auto(&mut self, auto: &Auto) {
-        //FIXME: Cambiar por un while
-        let position = self.autos.iter().position(|a| a.compare(auto));
+        let mut position = None;
 
-        if let Some(index) = position{
+        for i in 0..self.autos.len() {
+            if let Some(a) = self.autos.get(i) {
+                if a.equals(auto) {
+                    position = Some(i);
+                    break;
+                }
+            }
+        }
+
+
+        if let Some(index) = position {
             self.autos.remove(index);
         }
     }
 
     fn buscar_auto(&self, auto: &Auto) -> Option<&Auto> {
-        //FIXME: Cambiar por un while
-        self.autos.iter().find(|a| a.compare(auto))
+        let mut ret = None;
+        
+        for a in &self.autos {
+            if a.equals(auto) {
+                ret = Some(a);
+                break;
+            }
+        }
+
+        ret
     }
 }
 
@@ -135,17 +170,17 @@ mod tests {
         assert_eq!(auto.modelo, "Corolla");
         assert_eq!(auto.año, 2022);
         assert_eq!(auto.precio_bruto, 25000.0);
-        assert_eq!(auto.color, Color::Azul);
+        assert!(auto.color.equals(&Color::Azul));
     }
 
     #[test]
-    fn test_auto_compare() {
+    fn test_auto_equals() {
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         let auto2 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         let auto3 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
 
-        assert!(auto1.compare(&auto2));
-        assert!(!auto1.compare(&auto3));
+        assert!(auto1.equals(&auto2));
+        assert!(!auto1.equals(&auto3));
     }
 
     //TODO: Ver porque falla este test
@@ -193,7 +228,7 @@ mod tests {
         concesionario.eliminar_auto(&auto1);
 
         assert_eq!(concesionario.autos.len(), 1);
-        assert!(concesionario.autos[0].compare(&auto2));
+        assert!(concesionario.autos[0].equals(&auto2));
     }
 
     #[test]
@@ -206,8 +241,8 @@ mod tests {
         concesionario.agregar_auto(auto1.clone());
         concesionario.agregar_auto(auto2.clone());
 
-        assert!(concesionario.buscar_auto(&auto1).unwrap().compare(&auto1));
-        assert!(concesionario.buscar_auto(&auto2).unwrap().compare(&auto2));
+        assert!(concesionario.buscar_auto(&auto1).unwrap().equals(&auto1));
+        assert!(concesionario.buscar_auto(&auto2).unwrap().equals(&auto2));
         assert!(concesionario.buscar_auto(&auto3).is_none())
     }
 }

@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use super::ej3::Fecha;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone)]
+#[derive(Debug, Clone)]
 enum Animal {
     Perro,
     Gato,
@@ -9,7 +9,22 @@ enum Animal {
     Otros
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone)]
+impl Animal {
+    fn to_string(&self) -> String {
+        match self {
+            Animal::Perro => String::from("perro"),
+            Animal::Gato => String::from("gato"),
+            Animal::Caballo => String::from("caballo"),
+            Animal::Otros => String::from("otros"),
+        }
+    }
+
+    fn equals(&self, other: &Animal) -> bool {
+        self.to_string() == other.to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
 struct Mascota {
     nombre: String,
     edad: u32, 
@@ -26,9 +41,17 @@ impl Mascota {
             duenio
         }
     }
+
+    fn to_string(&self) -> String {
+        format!("Nombre: {}\nEdad: {}\nTipo: {}\nDueño: {}", self.nombre, self.edad, self.tipo.to_string(), self.duenio.to_string())
+    }
+
+    fn equals(&self, other: &Mascota) -> bool {
+        self.to_string() == other.to_string()
+    }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone)]
+#[derive(Debug, Clone)]
 struct Duenio {
     nombre: String,
     direccion: String,
@@ -43,9 +66,17 @@ impl Duenio {
             telefono
         }
     }
+
+    fn to_string(&self) -> String {
+        format!("Nombre: {}\nDirección: {}\nTeléfono: {}", self.nombre, self.direccion, self.telefono)
+    }
+
+    fn equals(&self, other: &Duenio) -> bool {
+        self.to_string() == other.to_string()
+    }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct AtencionRealizada {
     mascota: Mascota,
     diagnostico: String,
@@ -61,6 +92,24 @@ impl AtencionRealizada {
             tratamiento,
             proxima_visita
         }
+    }
+
+    fn to_string(&self) -> String {
+        let mut result = String::new();
+        result.push_str(&format!("Mascota:\n{}\n", self.mascota.to_string()));
+        result.push_str(&format!("Diagnóstico: {}\n", self.diagnostico));
+        result.push_str(&format!("Tratamiento: {}\n", self.tratamiento));
+        result.push_str(&format!("Próxima visita: {}\n", 
+            match &self.proxima_visita {
+                Some(fecha) => fecha.to_string(),
+                None => String::from("No programada"),
+            }
+        ));
+        result
+    }
+
+    fn equals(&self, other: &AtencionRealizada) -> bool {
+        self.to_string() == other.to_string()
     }
 }
 
@@ -108,8 +157,17 @@ impl Veterinaria {
     }
 
     fn eliminar_mascota(&mut self, mascota: &Mascota) {
-        //FIXME: Cambiar por un while
-        let position = self.cola.iter().position(|m| m == mascota);
+        let mut position = None;
+
+        for i in 0..self.cola.len() {
+            if let Some(m) = self.cola.get(i) {
+                if m.equals(mascota) {
+                    position = Some(i);
+                    break;
+                }
+            }
+        }
+
 
         if let Some(index) = position {
             self.cola.remove(index);
@@ -121,47 +179,73 @@ impl Veterinaria {
     }
 
     fn buscar_atencion_mascota(&self, nombre: String) -> Option<&AtencionRealizada> {
-        //FIXME: Cambiar por un while
-        self.atenciones
-            .iter()
-            .find(|a| a.mascota.nombre == nombre)
+        let mut ret = None;
+
+        for atencion in &self.atenciones {
+            if atencion.mascota.nombre == nombre {
+                ret = Some(atencion);
+                break;
+            }
+        }
+
+        ret
     }
 
     fn buscar_atencion_duenio(&self, nombre: String) -> Option<&AtencionRealizada> {
-        //FIXME: Cambiar por un while
-        self.atenciones
-            .iter()
-            .find(|a| a.mascota.duenio.nombre == nombre)
+        let mut ret = None;
+
+        for atencion in &self.atenciones {
+            if atencion.mascota.duenio.nombre == nombre {
+                ret = Some(atencion);
+                break;
+            }
+        }
+
+        ret
     }
 
     fn buscar_atencion_telefono(&self, telefono: String) -> Option<&AtencionRealizada> {
-        //FIXME: Cambiar por un while
-        self.atenciones
-            .iter()
-            .find(|a| a.mascota.duenio.telefono == telefono)
+        let mut ret = None;
+
+        for atencion in &self.atenciones {
+            if atencion.mascota.duenio.telefono == telefono {
+                ret = Some(atencion);
+                break;
+            }
+        }
+
+        ret
     }
 
     fn modificar_diagnostico(&mut self, diagnostico: String, atencion: &AtencionRealizada) {
-        let atencion = self.eliminar_atencion(atencion);
-
-        if let Some(mut at) = atencion {
-            at.diagnostico = diagnostico;
-            self.registrar_atencion(at);
+        for at in &mut self.atenciones {
+            if at.equals(atencion) {
+                at.diagnostico = diagnostico;
+                break;
+            }
         }
     }
 
     fn modificar_fecha(&mut self, fecha: Option<Fecha>, atencion: &AtencionRealizada) {
-        let atencion = self.eliminar_atencion(atencion);
-
-        if let Some(mut at) = atencion {
-            at.proxima_visita = fecha;
-            self.registrar_atencion(at);
+        for at in &mut self.atenciones {
+            if at.equals(atencion) {
+                at.proxima_visita = fecha;
+                break;
+            }
         }
     }
 
     fn eliminar_atencion(&mut self, atencion: &AtencionRealizada) -> Option<AtencionRealizada> {
-        //FIXME: Cambiar por un while
-        let position = self.atenciones.iter().position(|a| a == atencion);
+        let mut position = None;
+
+        for i in 0..self.atenciones.len() {
+            if let Some(at) = self.atenciones.get(i) {
+                if at.equals(atencion) {
+                    position = Some(i);
+                    break;
+                }
+            }
+        }
 
         if let Some(index) = position {
             Some(self.atenciones.remove(index))
@@ -183,7 +267,9 @@ mod tests {
         vet.agregar_mascota(mascota.clone());
         
         assert_eq!(vet.cola.len(), 1);
-        assert_eq!(vet.cola.front(), Some(&mascota));
+        let front = vet.cola.front();
+        assert!(front.is_some());
+        assert!(front.unwrap().equals(&mascota));
     }
     
     #[test]
@@ -196,7 +282,9 @@ mod tests {
         vet.agregar_mascota_prioridad(mascota2.clone());
         
         assert_eq!(vet.cola.len(), 2);
-        assert_eq!(vet.cola.front(), Some(&mascota2));
+        let front = vet.cola.front();
+        assert!(front.is_some());
+        assert!(front.unwrap().equals(&mascota2));
     }
     
     #[test]
@@ -207,8 +295,9 @@ mod tests {
         vet.agregar_mascota(mascota.clone());
         
         let atendida = vet.atender_mascota();
-        
-        assert_eq!(atendida, Some(mascota));
+
+        assert!(atendida.is_some());
+        assert!(atendida.unwrap().equals(&mascota));
         assert_eq!(vet.cola.len(), 0);
     }
     
@@ -232,7 +321,9 @@ mod tests {
         vet.registrar_atencion(atencion.clone());
         
         assert_eq!(vet.atenciones.len(), 1);
-        assert_eq!(vet.atenciones.get(0), Some(&atencion));
+        let get_0 = vet.atenciones.get(0);
+        assert!(get_0.is_some());
+        assert!(get_0.unwrap().equals(&atencion));
     }
     
     #[test]
@@ -244,8 +335,8 @@ mod tests {
         vet.registrar_atencion(atencion.clone());
         
         let buscada = vet.buscar_atencion_mascota("Luna".to_string());
-        
-        assert_eq!(buscada, Some(&atencion));
+        assert!(buscada.is_some());
+        assert!(buscada.unwrap().equals(&atencion));
     }
     
     #[test]
@@ -257,8 +348,8 @@ mod tests {
         vet.registrar_atencion(atencion.clone());
         
         let buscada = vet.buscar_atencion_duenio("Juan".to_string());
-        
-        assert_eq!(buscada, Some(&atencion));
+        assert!(buscada.is_some());
+        assert!(buscada.unwrap().equals(&atencion));
     }
     
     #[test]
@@ -270,8 +361,8 @@ mod tests {
         vet.registrar_atencion(atencion.clone());
         
         let buscada = vet.buscar_atencion_telefono("123456789".to_string());
-        
-        assert_eq!(buscada, Some(&atencion));
+        assert!(buscada.is_some());
+        assert!(buscada.unwrap().equals(&atencion));
     }
     
     #[test]
@@ -295,13 +386,14 @@ mod tests {
         
         vet.registrar_atencion(atencion.clone());
         
-        let nueva_fecha = Some(Fecha::new(2024, 5, 10)); // Cambiar por la fecha deseada
+        let nueva_fecha = Fecha::new(10, 5, 2024); // Cambiar por la fecha deseada
         
-        vet.modificar_fecha(nueva_fecha.clone(), &atencion);
+        vet.modificar_fecha(Some(nueva_fecha.clone()), &atencion);
         
         let modificado = vet.buscar_atencion_mascota("Luna".to_string()).unwrap();
         
-        assert_eq!(modificado.proxima_visita, nueva_fecha);
+        assert!(modificado.proxima_visita.is_some());
+        assert!(modificado.proxima_visita.as_ref().unwrap().equals(&nueva_fecha));
     }
 
     #[test]

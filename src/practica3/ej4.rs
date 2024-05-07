@@ -1,8 +1,22 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 enum TipoTriangulo {
     Equilatero,
     Isoceles,
     Escaleno
+}
+
+impl TipoTriangulo {
+    fn to_string(&self) -> String {
+        match self {
+            TipoTriangulo::Equilatero => String::from("equilatero"),
+            TipoTriangulo::Isoceles => String::from("isosceles"),
+            TipoTriangulo::Escaleno => String::from("escaleno"),
+        }
+    }
+
+    fn equals(&self, other: &TipoTriangulo) -> bool {
+        self.to_string() == other.to_string()
+    }
 }
 
 struct Triangulo {
@@ -59,21 +73,21 @@ mod tests {
     fn test_determinar_tipo_equilatero() {
         let triangulo = Triangulo::new(5, 5, 5);
         
-        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Equilatero);
+        assert!(triangulo.determinar_tipo().equals(&TipoTriangulo::Equilatero));
     }
 
     #[test]
     fn test_determinar_tipo_isoceles() {
         let triangulo = Triangulo::new(5, 5, 3);
         
-        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Isoceles);
+        assert!(triangulo.determinar_tipo().equals(&TipoTriangulo::Isoceles));
     }
 
     #[test]
     fn test_determinar_tipo_escaleno() {
         let triangulo = Triangulo::new(3, 4, 5);
         
-        assert_eq!(triangulo.determinar_tipo(), TipoTriangulo::Escaleno);
+        assert!(triangulo.determinar_tipo().equals(&TipoTriangulo::Escaleno));
     }
 
     #[test]
