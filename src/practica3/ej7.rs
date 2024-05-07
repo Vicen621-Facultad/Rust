@@ -99,6 +99,7 @@ impl ConcesionarioAuto {
     }
 
     fn eliminar_auto(&mut self, auto: &Auto) {
+        //FIXME: Cambiar por un while
         let position = self.autos.iter().position(|a| a.compare(auto));
 
         if let Some(index) = position{
@@ -107,6 +108,7 @@ impl ConcesionarioAuto {
     }
 
     fn buscar_auto(&self, auto: &Auto) -> Option<&Auto> {
+        //FIXME: Cambiar por un while
         self.autos.iter().find(|a| a.compare(auto))
     }
 }

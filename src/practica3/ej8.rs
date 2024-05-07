@@ -54,6 +54,7 @@ impl Playlist {
     }
 
     fn obtener_pos_cancion(&self, cancion: &Cancion) -> Option<usize> {
+        //FIXME: Cambiar por un while
         self.canciones.iter().position(|c| c == cancion)
     }
 
@@ -67,6 +68,7 @@ impl Playlist {
     }
 
     fn buscar_cancion_por_nombre(&self, nombre: String) -> Option<&Cancion> {
+        //FIXME: Cambiar por un while
         self.canciones.iter().find(|cancion| cancion.titulo == nombre)
     }
 

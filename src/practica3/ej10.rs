@@ -191,6 +191,7 @@ impl Biblioteca {
     }
 
     fn buscar_prestamo(&mut self, libro: &Libro, cliente: &Cliente) -> Option<&mut Prestamo> {
+        //FIXME: Cambiar por un while
         self.prestamos.iter_mut().find(|prestamo| &prestamo.libro == libro && &prestamo.cliente == cliente)
     }
 

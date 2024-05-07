@@ -108,6 +108,7 @@ impl Veterinaria {
     }
 
     fn eliminar_mascota(&mut self, mascota: &Mascota) {
+        //FIXME: Cambiar por un while
         let position = self.cola.iter().position(|m| m == mascota);
 
         if let Some(index) = position {
@@ -120,18 +121,21 @@ impl Veterinaria {
     }
 
     fn buscar_atencion_mascota(&self, nombre: String) -> Option<&AtencionRealizada> {
+        //FIXME: Cambiar por un while
         self.atenciones
             .iter()
             .find(|a| a.mascota.nombre == nombre)
     }
 
     fn buscar_atencion_duenio(&self, nombre: String) -> Option<&AtencionRealizada> {
+        //FIXME: Cambiar por un while
         self.atenciones
             .iter()
             .find(|a| a.mascota.duenio.nombre == nombre)
     }
 
     fn buscar_atencion_telefono(&self, telefono: String) -> Option<&AtencionRealizada> {
+        //FIXME: Cambiar por un while
         self.atenciones
             .iter()
             .find(|a| a.mascota.duenio.telefono == telefono)
@@ -156,6 +160,7 @@ impl Veterinaria {
     }
 
     fn eliminar_atencion(&mut self, atencion: &AtencionRealizada) -> Option<AtencionRealizada> {
+        //FIXME: Cambiar por un while
         let position = self.atenciones.iter().position(|a| a == atencion);
 
         if let Some(index) = position {
