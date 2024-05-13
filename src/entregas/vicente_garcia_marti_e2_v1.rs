@@ -416,7 +416,6 @@ mod tests {
 
         let reporte = playlist.generar_reporte_genero(Genero::Rock);
 
-
         assert_eq!(reporte.total_canciones, reporte.canciones.len() as u32);
         assert_eq!(reporte.total_canciones, 2);
         assert!(reporte.canciones[0].equals(&CancionReporte::new(
