@@ -97,5 +97,5 @@ fn obtener_edades<'a>(vec: &Vec<Persona<'a>>) -> Vec<u8> {
 }
 
 //TODO: Hacer
-fn mayor_menor_salario<'a>(_vec: &Vec<Persona<'a>>) {
+fn mayor_menor_salario<'a>(_vec: &'a Vec<Persona>) { //-> (&'a Persona<'a>, &'a Persona<'a>) {
 }
