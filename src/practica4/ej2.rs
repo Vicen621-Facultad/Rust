@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 #[derive(Clone, Copy)]
 struct Persona<'a> {
     nombre: &'a str,
