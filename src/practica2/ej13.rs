@@ -1,4 +1,3 @@
-// TODO: Preguntar si esta bien asi o hay que hacer un sort manual
 pub fn ordenar_nombres(names: &mut [String; 4]) {
     names.sort()
 }

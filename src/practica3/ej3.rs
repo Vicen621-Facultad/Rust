@@ -1,22 +1,33 @@
+use chrono::{Datelike, Local};
+
 #[derive(Debug, Clone)]
 pub struct Fecha {
-    dia: u32,
-    mes: u32,
-    anio: u32,
+    day: u32,
+    month: u32,
+    year: i32,
 }
 
 impl Fecha {
-    pub fn new(dia: u32, mes: u32, anio: u32) -> Fecha {
+    pub fn now() -> Self {
+        let now = Local::now();
         Fecha {
-            dia,
-            mes,
-            anio,
+            day: now.day(),
+            month: now.month(),
+            year: now.year(),
+        }
+    }
+
+    pub fn new(day: u32, month: u32, year: i32) -> Self {
+        Fecha {
+            day,
+            month,
+            year
         }
     }
 
     pub fn to_string(&self) -> String {
         let mut result = String::new();
-        result.push_str(&format!("{}/{}/{}", self.dia, self.mes, self.anio));
+        result.push_str(&format!("{}/{}/{}", self.day, self.month, self.year));
         result
     }
 
@@ -25,23 +36,23 @@ impl Fecha {
     }
 
     pub fn es_fecha_valida(&self) -> bool {
-        self.dia <= self.obtener_dias_para_mes() && self.dia > 0
+        self.day <= self.obtener_dias_para_mes() && self.day > 0
     }
 
     pub fn es_bisiesto(&self) -> bool {
-        self.anio % 4 == 0
+        self.year % 4 == 0
     }
 
     /// Devuelve la cantidad de dias que tiene el mes actual
     fn obtener_dias_para_mes(&self) -> u32 {
-        if self.mes > 12 || self.mes < 1 {
+        if self.month > 12 || self.month < 1 {
             return 0;
         }
 
         const DIAS_POR_MES: [u32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        let dias = DIAS_POR_MES[(self.mes - 1) as usize];
+        let dias = DIAS_POR_MES[(self.month - 1) as usize];
         // bool as u32 = if true { 1 } else { 0 }
-        dias + (self.mes == 2 && self.es_bisiesto()) as u32
+        dias + (self.month == 2 && self.es_bisiesto()) as u32
     }
 
     pub fn sumar_dias(&mut self, dias: u32) {
@@ -49,19 +60,19 @@ impl Fecha {
         while dias_restantes > 0 {
             let dias_en_mes = self.obtener_dias_para_mes();
             // Se suma 1 ya que tengo que contar el dia actual
-            let dias_hasta_fin_de_mes = dias_en_mes - self.dia + 1;
+            let dias_hasta_fin_de_mes = dias_en_mes - self.day + 1;
 
             if dias_hasta_fin_de_mes > dias_restantes {
-                self.dia += dias_restantes;
+                self.day += dias_restantes;
                 dias_restantes = 0;
             } else {
                 dias_restantes -= dias_hasta_fin_de_mes;
-                self.mes += 1;
-                if self.mes > 12 {
-                    self.mes = 1;
-                    self.anio += 1;
+                self.month += 1;
+                if self.month > 12 {
+                    self.month = 1;
+                    self.year += 1;
                 }
-                self.dia = 1;
+                self.day = 1;
             }
         }
     }
@@ -69,25 +80,25 @@ impl Fecha {
     pub fn restar_dias(&mut self, dias: u32) {
         let mut dias_restantes = dias;
         while dias_restantes > 0 {
-            if self.dia > dias_restantes {
-                self.dia -= dias_restantes;
+            if self.day > dias_restantes {
+                self.day -= dias_restantes;
                 dias_restantes = 0;
             } else {
-                dias_restantes -= self.dia;
-                self.mes -= 1;
-                if self.mes == 0 {
-                    self.mes = 12;
-                    self.anio -= 1;
+                dias_restantes -= self.day;
+                self.month -= 1;
+                if self.month == 0 {
+                    self.month = 12;
+                    self.year -= 1;
                 }
-                self.dia = self.obtener_dias_para_mes();
+                self.day = self.obtener_dias_para_mes();
             }
         }
     }
 
     pub fn es_mayor(&self, una_fecha: &Fecha) -> bool {
-        (self.anio > una_fecha.anio) || 
-            (self.anio == una_fecha.anio && self.mes > una_fecha.mes) || 
-            (self.anio == una_fecha.anio && self.mes == una_fecha.mes && self.dia > una_fecha.dia)
+        (self.year > una_fecha.year) || 
+            (self.year == una_fecha.year && self.month > una_fecha.month) || 
+            (self.year == una_fecha.year && self.month == una_fecha.month && self.day > una_fecha.day)
     }
 }
 
@@ -176,5 +187,14 @@ mod tests {
         let fecha11 = Fecha::new(5, 3, 2024);
         let fecha12 = Fecha::new(6, 3, 2024);
         assert!(!fecha11.es_mayor(&fecha12));
+    }
+
+    #[test]
+    fn test_now() {
+        let fecha = Fecha::now();
+        let now = Local::now();
+        assert_eq!(fecha.day, now.day());
+        assert_eq!(fecha.month, now.month());
+        assert_eq!(fecha.year, now.year());
     }
 }

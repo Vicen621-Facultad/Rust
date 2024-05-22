@@ -183,7 +183,7 @@ mod tests {
         assert!(!auto1.equals(&auto3));
     }
 
-    //TODO: Ver porque falla este test
+    //
     #[test]
     fn test_auto_calcular_precio() {
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
