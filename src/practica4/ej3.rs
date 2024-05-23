@@ -1,198 +1,214 @@
-/*use std::collections::HashMap;
+use std::collections::HashMap;
 use crate::practica3::ej3::Fecha;
 
-struct StreamingRust<'a> {
-    users: Vec<User>,
-    subscriptions: Vec<Subscription<'a>>
+struct StreamingRust {
+    usuarios: Vec<Usuario>,
+    suscripciones: Vec<Suscripcion>
 }
 
-struct User {
+struct Usuario {
     id: u32,
-    name: String,
-    payment_method: PaymentMethod,
+    nombre: String,
+    metodo_pago: MetodoPago,
 }
 
-struct Subscription<'a> {
-    subscription_type: SubscriptionType,
-    state: SubscriptionState,
-    duration_months: u32,
-    start_date: Fecha,
-    user: &'a User
+struct Suscripcion {
+    tipo_suscripcion: TipoSuscripcion,
+    estado: EstadoSuscripcion,
+    duracion_meses: u32,
+    fecha_inicio: Fecha,
+    id_usuario: u32
 }
 
-#[derive(Eq, PartialEq)]
-enum SubscriptionState {
-    Active,
-    Inactive,
+#[derive(Eq, PartialEq, Debug)]
+enum EstadoSuscripcion {
+    Activa,
+    Inactiva,
 }
 
-#[derive(Eq, PartialEq, Hash, Clone)]
-enum SubscriptionType {
+#[derive(Eq, PartialEq, Hash, Clone, Debug)]
+enum TipoSuscripcion {
     Basic,
     Clasic,
     Super,
 }
 
-#[derive(Eq, PartialEq, Hash, Clone)]
-enum PaymentMethod {
-    Cash,
-    MercadoPago { account_id: String },
-    CreditCard { card_number: String, expiration_date: String },
-    BankTransfer { bank_account: String },
-    Crypto { wallet_address: String },
+#[derive(Eq, PartialEq, Hash, Clone, Debug)]
+enum MetodoPago {
+    Efectivo,
+    MercadoPago { id_cuenta: String },
+    Credito { numero_tarjeta: String, expiracion: String },
+    TransferenciaBancaria { cuenta_bancaria: String },
+    Cripto { billetera: String },
 }
 
-impl<'a> StreamingRust<'a> {
+impl StreamingRust {
     fn new() -> Self {
         StreamingRust {
-            users: Vec::new(),
-            subscriptions: Vec::new()
+            usuarios: Vec::new(),
+            suscripciones: Vec::new()
         }
     }
 }
 
-trait UserManagement {
-    fn create_subscription(&mut self, user_id: u32, name: String, subscription_type: SubscriptionType, duration_months: u32, payment_method: PaymentMethod);
-    fn create_user(&mut self, user_id: u32, name: String, payment_method: PaymentMethod) -> &User;
-    fn get_user(&self, user_id: u32) -> Option<&User>;
+trait GestorUsuarios {
+    fn crear_subscripcion(&mut self, id_usuario: u32, nombre: String, tipo_suscripcion: TipoSuscripcion, duracion_meses: u32, metodo_pago: MetodoPago);
+    fn crear_usuario(&mut self, id_usuario: u32, nombre: String, metodo_pago: MetodoPago) -> &Usuario;
+    fn get_usuario(&self, id_usuario: u32) -> Option<&Usuario>;
 }
 
-impl<'a> UserManagement for StreamingRust<'a> {
-    fn create_subscription(&mut self, user_id: u32, name: String, subscription_type: SubscriptionType, duration_months: u32, payment_method: PaymentMethod) {
-        if self.get_user(user_id).is_none() {
-            self.create_user(user_id, name.clone(), payment_method.clone());
+impl GestorUsuarios for StreamingRust {
+    fn crear_subscripcion(&mut self, id_usuario: u32, nombre: String, tipo_suscripcion: TipoSuscripcion, duracion_meses: u32, metodo_pago: MetodoPago) {
+        if self.get_usuario(id_usuario).is_none() {
+            self.crear_usuario(id_usuario, nombre.clone(), metodo_pago.clone());
         }
 
-        let user = self.get_user(user_id).unwrap();
-        let subscription = Subscription::new(subscription_type, duration_months, &user);
-        self.subscriptions.push(subscription);
+        if self.get_subscripcion(id_usuario).is_none() {
+            let usuario = self.get_usuario(id_usuario).unwrap();
+            let subscripcion = Suscripcion::new(tipo_suscripcion, duracion_meses, usuario.id);
+            self.suscripciones.push(subscripcion);
+        }
     }
 
-    fn create_user(&mut self, user_id: u32, name: String, payment_method: PaymentMethod) -> &User {
-        let user = User::new(user_id, name, payment_method);
-        self.users.push(user);
-        self.users.last().unwrap()
+    fn crear_usuario(&mut self, id_usuario: u32, nombre: String, metodo_pago: MetodoPago) -> &Usuario {
+        let usuario = Usuario::new(id_usuario, nombre, metodo_pago);
+        self.usuarios.push(usuario);
+        self.usuarios.last().unwrap()
     }
 
-    fn get_user(&self, user_id: u32) -> Option<&User> {
-        self.users.iter().find(|user| user.id == user_id)   
+    fn get_usuario(&self, id_usuario: u32) -> Option<&Usuario> {
+        self.usuarios.iter().find(|usuario| usuario.id == id_usuario)   
     }
 }
 
-trait Statistics {
-    fn most_used_active_payment_method(&self) -> Option<PaymentMethod>;
-    fn most_popular_active_subscription(&self) -> Option<SubscriptionType>;
-    fn most_used_payment_method(&self) -> Option<PaymentMethod>;
-    fn most_popular_subscription(&self) -> Option<SubscriptionType>;
+trait Estadisticas {
+    fn metodo_pago_activo_mas_usado(&self) -> Option<MetodoPago>;
+    fn tipo_suscripcion_activa_mas_usada(&self) -> Option<TipoSuscripcion>;
+    fn metodo_pago_mas_usado(&self) -> Option<MetodoPago>;
+    fn tipo_suscripcion_mas_usado(&self) -> Option<TipoSuscripcion>;
 }
 
-impl Statistics for StreamingRust<'_> {
-    fn most_used_active_payment_method(&self) -> Option<PaymentMethod> {
-        let mut payment_methods = HashMap::new();
-        self.subscriptions.iter().filter(|subscription| subscription.is_active()).for_each(|subscription| {
-            *payment_methods.entry(subscription.user.payment_method.clone()).or_insert(0) += 1;
+impl Estadisticas for StreamingRust {
+    //TODO: Preguntar a ver si esta bien esto o se deberia hacer de otra manera
+    fn metodo_pago_activo_mas_usado(&self) -> Option<MetodoPago> {
+        let mut metodo_pagos = HashMap::new();
+
+        self.suscripciones.iter()
+            .filter(|subscripcion| subscripcion.esta_activa())
+            .map(|subscripcion| self.get_usuario(subscripcion.id_usuario))
+            .filter(|usuario| usuario.is_some())
+            .map(|usuario| usuario.unwrap())
+            .for_each(|usuario| {
+                *metodo_pagos.entry(usuario.metodo_pago.clone()).or_insert(0) += 1;
+            });
+
+        metodo_pagos.iter().max_by_key(|(_, count)| *count).map(|(tipo_suscripcion, _)| tipo_suscripcion.clone())
+    }
+
+    fn tipo_suscripcion_activa_mas_usada(&self) -> Option<TipoSuscripcion> {
+        let mut suscripciones = HashMap::new();
+        self.suscripciones.iter()
+        .filter(|subscripcion| subscripcion.esta_activa())
+        .for_each(|subscripcion| {
+            *suscripciones.entry(subscripcion.tipo_suscripcion.clone()).or_insert(0) += 1;
         });
 
-        payment_methods.iter().max_by_key(|(_, count)| *count).map(|(subscription_type, _)| subscription_type.clone())
+        suscripciones.iter()
+        .max_by_key(|(_, count)| *count)
+        .map(|(tipo_suscripcion, _)| tipo_suscripcion.clone())
     }
 
-    fn most_popular_active_subscription(&self) -> Option<SubscriptionType> {
-        let mut subscriptions = HashMap::new();
-        self.subscriptions.iter().filter(|subscription| subscription.is_active()).for_each(|subscription| {
-            *subscriptions.entry(subscription.subscription_type.clone()).or_insert(0) += 1;
-        });
-
-        subscriptions.iter().max_by_key(|(_, count)| *count).map(|(subscription_type, _)| subscription_type.clone())
-    }
-
-    fn most_used_payment_method(&self) -> Option<PaymentMethod> {
-        let mut payment_methods = HashMap::new();
-        for user in &self.users {
-            *payment_methods.entry(user.payment_method.clone()).or_insert(0) += 1;
+    fn metodo_pago_mas_usado(&self) -> Option<MetodoPago> {
+        let mut metodo_pagos = HashMap::new();
+        for usuario in &self.usuarios {
+            *metodo_pagos.entry(usuario.metodo_pago.clone()).or_insert(0) += 1;
         }
 
-        payment_methods.iter().max_by_key(|(_, count)| *count).map(|(payment_method, _)| payment_method.clone())
+        metodo_pagos.iter()
+        .max_by_key(|(_, count)| *count)
+        .map(|(metodo_pago, _)| metodo_pago.clone())
     }
 
-    fn most_popular_subscription(&self) -> Option<SubscriptionType> {
-        let mut subscriptions = HashMap::new();
-        for subscription in &self.subscriptions {
-            *subscriptions.entry(subscription.subscription_type.clone()).or_insert(0) += 1;
+    fn tipo_suscripcion_mas_usado(&self) -> Option<TipoSuscripcion> {
+        let mut suscripciones = HashMap::new();
+        for subscripcion in &self.suscripciones {
+            *suscripciones.entry(subscripcion.tipo_suscripcion.clone()).or_insert(0) += 1;
         }
 
-        subscriptions.iter().max_by_key(|(_, count)| *count).map(|(subscription_type, _)| subscription_type.clone())
+        suscripciones.iter()
+        .max_by_key(|(_, count)| *count)
+        .map(|(tipo_suscripcion, _)| tipo_suscripcion.clone())
     }
 }
-trait SubscriptionManagement {
-    fn upgrade_subscription(&mut self, user_id: u32);
-    fn downgrade_subscription(&mut self, user_id: u32);
-    fn cancel_subscription(&mut self, user_id: u32);
-    fn get_subscription(&mut self, user_id: u32) -> Option<&mut Subscription>;
+trait GestorSuscripciones {
+    fn upgrade_subscripcion(&mut self, id_usuario: u32);
+    fn downgrade_subscripcion(&mut self, id_usuario: u32);
+    fn cancel_subscripcion(&mut self, id_usuario: u32);
+    fn get_subscripcion(&mut self, id_usuario: u32) -> Option<&mut Suscripcion>;
 }
 
-impl SubscriptionManagement for StreamingRust<'_> {
-    fn upgrade_subscription(&mut self, user_id: u32) {
-        let subscription: Option<&mut Subscription> = self.get_subscription(user_id);
-        if let Some(subscription) = subscription {
-            subscription.upgrade();
+impl GestorSuscripciones for StreamingRust {
+    fn upgrade_subscripcion(&mut self, id_usuario: u32) {
+        let subscripcion: Option<&mut Suscripcion> = self.get_subscripcion(id_usuario);
+        if let Some(subscripcion) = subscripcion {
+            subscripcion.upgrade();
         }
     }
 
-    fn downgrade_subscription(&mut self, user_id: u32) {
-        let subscription = self.get_subscription(user_id);
-        if let Some(subscription) = subscription {
-            subscription.downgrade();
+    fn downgrade_subscripcion(&mut self, id_usuario: u32) {
+        let subscripcion = self.get_subscripcion(id_usuario);
+        if let Some(subscripcion) = subscripcion {
+            subscripcion.downgrade();
         }
     }
 
-    fn cancel_subscription(&mut self, user_id: u32) {
-        let subscription = self.get_subscription(user_id);
-        if let Some(subscription) = subscription {
-            subscription.cancel();
+    fn cancel_subscripcion(&mut self, id_usuario: u32) {
+        let subscripcion = self.get_subscripcion(id_usuario);
+        if let Some(subscripcion) = subscripcion {
+            subscripcion.cancel();
         }
     }
 
-    //INCOMPLETE: I don't know how to return a mutable reference to a Subscription
-    fn get_subscription(&mut self, _user_id: u32) -> Option<&mut Subscription> {
-        todo!("Implementar SubscriptionManagement::get_subscription");
+    fn get_subscripcion(&mut self, id_usuario: u32) -> Option<&mut Suscripcion> {
+        self.suscripciones.iter_mut().find(|subscripcion| subscripcion.id_usuario == id_usuario)
     }
 }
 
-impl User {
-    fn new(id: u32, name: String, payment_method: PaymentMethod) -> Self {
-        User {
+impl Usuario {
+    fn new(id: u32, nombre: String, metodo_pago: MetodoPago) -> Self {
+        Usuario {
             id,
-            name,
-            payment_method
+            nombre,
+            metodo_pago
         }
     }
 
 }
 
-impl<'a> Subscription<'a> {
-    fn new(subscription_type: SubscriptionType, duration_months: u32, user: &'a User) -> Self {
-        Subscription {
-            subscription_type,
-            state: SubscriptionState::Active,
-            duration_months,
-            start_date: Fecha::now(),
-            user
+impl Suscripcion {
+    fn new(tipo_suscripcion: TipoSuscripcion, duracion_meses: u32, id_usuario: u32) -> Self {
+        Suscripcion {
+            estado: EstadoSuscripcion::Activa,
+            fecha_inicio: Fecha::now(),
+            tipo_suscripcion,
+            duracion_meses,
+            id_usuario
         }
     }
 
     fn upgrade(&mut self) {
-        self.subscription_type = match self.subscription_type {
-            SubscriptionType::Basic => SubscriptionType::Clasic,
-            SubscriptionType::Clasic => SubscriptionType::Super,
-            SubscriptionType::Super => SubscriptionType::Super, // No se puede mejorar más
+        self.tipo_suscripcion = match self.tipo_suscripcion {
+            TipoSuscripcion::Basic => TipoSuscripcion::Clasic,
+            TipoSuscripcion::Clasic => TipoSuscripcion::Super,
+            TipoSuscripcion::Super => TipoSuscripcion::Super, // No se puede mejorar más
         };
     }
 
     fn downgrade(&mut self) {
-        self.subscription_type = match self.subscription_type {
-            SubscriptionType::Super => SubscriptionType::Clasic,
-            SubscriptionType::Clasic => SubscriptionType::Basic,
-            SubscriptionType::Basic => {
+        self.tipo_suscripcion = match self.tipo_suscripcion {
+            TipoSuscripcion::Super => TipoSuscripcion::Clasic,
+            TipoSuscripcion::Clasic => TipoSuscripcion::Basic,
+            TipoSuscripcion::Basic => {
                 self.cancel();
                 return;
             }
@@ -200,24 +216,24 @@ impl<'a> Subscription<'a> {
     }
 
     fn cancel(&mut self) {
-        self.state = SubscriptionState::Inactive;
+        self.estado = EstadoSuscripcion::Inactiva;
     }
 
-    fn cost(&self) -> f64 {
-        self.subscription_type.cost() * self.duration_months as f64
+    fn costo(&self) -> f64 {
+        self.tipo_suscripcion.costo() * self.duracion_meses as f64
     }
 
-    fn is_active(&self) -> bool {
-        self.state == SubscriptionState::Active
+    fn esta_activa(&self) -> bool {
+        self.estado == EstadoSuscripcion::Activa
     }
 }
 
-impl SubscriptionType {
-    fn cost(&self) -> f64 {
+impl TipoSuscripcion {
+    fn costo(&self) -> f64 {
         match self {
-            SubscriptionType::Basic => 10.0,
-            SubscriptionType::Clasic => 20.0,
-            SubscriptionType::Super => 30.0,
+            TipoSuscripcion::Basic => 10.0,
+            TipoSuscripcion::Clasic => 20.0,
+            TipoSuscripcion::Super => 30.0,
         }
     }
 }
@@ -227,7 +243,122 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_name() {
-        
+    fn test_subscripcion_cost() {
+        let subscripcion = Suscripcion::new(TipoSuscripcion::Basic, 3, 1);
+        assert_eq!(subscripcion.costo(), 30.0);
     }
-}*/
+
+    #[test]
+    fn test_crear_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        let usuario = streaming.get_usuario(1).unwrap();
+        assert_eq!(usuario.nombre, "Juan");
+        assert_eq!(usuario.metodo_pago, MetodoPago::Efectivo);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.tipo_suscripcion, TipoSuscripcion::Basic);
+        assert_eq!(subscripcion.duracion_meses, 3);
+        assert_eq!(subscripcion.id_usuario, 1);
+    }
+
+    #[test]
+    fn test_upgrade_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.upgrade_subscripcion(1);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.tipo_suscripcion, TipoSuscripcion::Clasic);
+    }
+
+    #[test]
+    fn test_upgrade_subscripcion_super() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.upgrade_subscripcion(1);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.tipo_suscripcion, TipoSuscripcion::Super);
+    }
+
+    #[test]
+    fn test_downgrade_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.downgrade_subscripcion(1);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.tipo_suscripcion, TipoSuscripcion::Clasic);
+    }
+
+    #[test]
+    fn test_downgrade_subscripcion_cancel() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.downgrade_subscripcion(1);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.estado, EstadoSuscripcion::Inactiva);
+    }
+
+    #[test]
+    fn test_cancel_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.cancel_subscripcion(1);
+        let subscripcion = streaming.suscripciones.first().unwrap();
+        assert_eq!(subscripcion.estado, EstadoSuscripcion::Inactiva);
+    }
+
+    #[test]
+    fn test_most_used_active_metodo_pago() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(2, "Pedro".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(3, "Pablo".to_string(), TipoSuscripcion::Super, 3, MetodoPago::MercadoPago { id_cuenta: "123".to_string() });
+        streaming.crear_subscripcion(4, "Jose".to_string(), TipoSuscripcion::Super, 3, MetodoPago::MercadoPago { id_cuenta: "123".to_string() });
+        streaming.crear_subscripcion(5, "Pepe".to_string(), TipoSuscripcion::Super, 3, MetodoPago::MercadoPago { id_cuenta: "123".to_string() });
+        streaming.cancel_subscripcion(4);
+        streaming.cancel_subscripcion(5);
+        let metodo_pago = streaming.metodo_pago_activo_mas_usado().unwrap();
+        assert_eq!(metodo_pago, MetodoPago::Efectivo);
+    }
+
+    #[test]
+    fn test_most_popular_active_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(2, "Pedro".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(3, "Pablo".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(4, "Jose".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(5, "Pepe".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.cancel_subscripcion(4);
+        streaming.cancel_subscripcion(5);
+        let tipo_suscripcion = streaming.tipo_suscripcion_activa_mas_usada().unwrap();
+        assert_eq!(tipo_suscripcion, TipoSuscripcion::Super);
+    }
+
+    #[test]
+    fn test_most_used_metodo_pago() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(2, "Pedro".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(3, "Pablo".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(4, "Jose".to_string(), TipoSuscripcion::Super, 3, MetodoPago::MercadoPago { id_cuenta: "123".to_string() });
+        streaming.crear_subscripcion(5, "Pepe".to_string(), TipoSuscripcion::Super, 3, MetodoPago::MercadoPago { id_cuenta: "123".to_string() });
+        streaming.cancel_subscripcion(1);
+        streaming.cancel_subscripcion(2);
+        let metodo_pago = streaming.metodo_pago_mas_usado().unwrap();
+        assert_eq!(metodo_pago, MetodoPago::Efectivo);
+    }
+
+    #[test]
+    fn test_most_popular_subscripcion() {
+        let mut streaming = StreamingRust::new();
+        streaming.crear_subscripcion(1, "Juan".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(2, "Pedro".to_string(), TipoSuscripcion::Super, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(3, "Pablo".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(4, "Jose".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.crear_subscripcion(5, "Pepe".to_string(), TipoSuscripcion::Basic, 3, MetodoPago::Efectivo);
+        streaming.cancel_subscripcion(4);
+        streaming.cancel_subscripcion(5);
+        let tipo_suscripcion = streaming.tipo_suscripcion_mas_usado().unwrap();
+        assert_eq!(tipo_suscripcion, TipoSuscripcion::Basic);
+    }
+}
