@@ -1,6 +1,6 @@
 use chrono::{Datelike, Local};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fecha {
     day: u32,
     month: u32,

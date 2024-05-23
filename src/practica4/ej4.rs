@@ -1,5 +1,5 @@
+//TODO: Terminar
 use std::ops::Deref;
-
 use crate::practica3::ej3::Fecha;
 
 const DESCUENTO_NEWSLETTER: f32 = 0.1; // 10%
@@ -12,8 +12,8 @@ struct SistemaVentas<'a> {
 
 struct Venta<'a> {
     productos: Vec<Producto>,
-    dni_cliente: &'a Cliente,
-    legajo_vendedor: &'a Vendedor,
+    cliente: &'a Cliente,
+    vendedor: &'a Vendedor,
     metodo_pago: MetodoPago,
     fecha: Fecha
 }
@@ -56,6 +56,53 @@ struct Cliente {
     correo: Option<String>,
 }
 
+trait GestorVendedores {
+    fn crear_vendedor(&mut self, nombre: String, apellido: String, direccion: String, dni: String, legajo: u32) -> &Vendedor;
+    fn get_vendedor(&self, legajo: u32) -> Option<&Vendedor>;
+}
+
+trait GestorClientes {
+    fn crear_cliente(&mut self, nombre: String, apellido: String, direccion: String, dni: String) -> &Cliente;
+    fn get_cliente(&self, dni: &str) -> Option<&Cliente>;
+}
+
+trait GestorVentas<'a> {
+    fn crear_venta(&mut self, productos: Vec<Producto>, cliente: &'a Cliente, vendedor: &'a Vendedor, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta;
+}
+
+impl<'a> GestorVendedores for SistemaVentas<'a> {
+    fn crear_vendedor(&mut self, nombre: String, apellido: String, direccion: String, dni: String, legajo: u32) -> &Vendedor{
+        self.vendedores.push(Vendedor::new(nombre, apellido, direccion, dni, legajo));
+        self.vendedores.last().unwrap()
+    }
+
+    fn get_vendedor(&self, legajo: u32) -> Option<&Vendedor> {
+        self.vendedores.iter().find(|v| v.get_legajo() == legajo)
+    }
+}
+
+impl<'a> GestorClientes for SistemaVentas<'a> {
+    fn crear_cliente(&mut self, nombre: String, apellido: String, direccion: String, dni: String) -> &Cliente{
+        self.clientes.push(Cliente::new(nombre, apellido, direccion, dni));
+        self.clientes.last().unwrap()
+    }
+
+    fn get_cliente(&self, dni: &str) -> Option<&Cliente> {
+        self.clientes.iter().find(|c| c.get_dni() == dni)
+    }
+}
+
+impl<'a> GestorVentas<'a> for SistemaVentas<'a> {
+    fn crear_venta(&mut self, productos: Vec<Producto>, cliente: &'a Cliente, vendedor: &'a Vendedor, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta{
+        if (self.get_cliente(&cliente.dni)).is_none() {
+            // self.crear_cliente(cliente.nombre, cliente.apellido, cliente.direccion, cliente.dni);
+        }
+
+        self.ventas.push(Venta::new(productos, cliente, &vendedor, metodo_pago, fecha));
+        self.ventas.last().unwrap()
+    }
+}
+
 impl<'a> SistemaVentas<'a> {
     fn new() -> Self {
         SistemaVentas {
@@ -74,10 +121,22 @@ impl CalcularPrecio for Venta<'_> {
     fn get_precio_final(&self) -> f32 {
         let total = self.productos.iter().map(|p| p.get_precio_final()).sum();
         
-        if self.dni_cliente.esta_suscrito() {
+        if self.cliente.esta_suscrito() {
             total * (1.0 - DESCUENTO_NEWSLETTER)
         } else {
             total
+        }
+    }
+}
+
+impl<'a> Venta<'a> {
+    fn new(productos: Vec<Producto>, cliente: &'a Cliente, vendedor: &'a Vendedor, metodo_pago: MetodoPago, fecha: Fecha) -> Self {
+        Venta {
+            productos,
+            cliente,
+            vendedor,
+            metodo_pago,
+            fecha
         }
     }
 }
@@ -146,10 +205,6 @@ impl DatosPersona {
     fn get_dni(&self) -> &String {
         &self.dni
     }
-}
-
-trait GestorVendedores<T> {
-    fn crear(&mut self, nombre: String, apellido: String, direccion: String, dni: String, legajo: u32);
 }
 
 impl Deref for Vendedor {
