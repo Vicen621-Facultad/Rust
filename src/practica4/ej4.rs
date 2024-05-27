@@ -414,7 +414,7 @@ mod tests {
         ];
         let venta = Venta::new(productos, "12345678".to_string(), 1, MetodoPago::Efectivo);
         assert_eq!(venta.get_precio_final(0.0), 232.5);
-        assert_eq!(venta.get_precio_final(0.1), 225.0);
+        assert_eq!(venta.get_precio_final(0.1), 209.25);
     }
 
     #[test]
