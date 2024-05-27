@@ -61,10 +61,9 @@ struct Playlist {
 
 impl Playlist {
     fn new(nombre: String, mut canciones: Vec<Cancion>) -> Playlist {
-        let canciones = match std::fs::File::open("src/canciones.json") {
+        let canciones = match std::fs::File::open("test/".to_owned() + nombre.as_str() + ".json") {
             Ok(mut file) => {
                 let mut buf = String::new();
-                //TODO: Preguntar si se puede hacer unwrap en lugar de match
                 file.read_to_string(&mut buf).unwrap();
                 let mut canciones_nuevas: Vec<Cancion> = serde_json::from_str(&buf).unwrap();
                 canciones_nuevas.append(&mut canciones);
@@ -79,7 +78,7 @@ impl Playlist {
     }
 
     fn escribir_archivo(&self) -> Result<(), std::io::Error> {
-        let mut file = std::fs::File::create("src/canciones.json")?;
+        let mut file = std::fs::File::create("test/".to_owned() + self.nombre.as_str() + ".json")?;
         let serialized = serde_json::to_string(&self.canciones)?;
         file.write_all(&serialized.as_bytes())?;
         Ok(())
@@ -177,14 +176,9 @@ impl Playlist {
     }
 }
 
-//FIXME: Que el nombre del archivo sea el nombre del test
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn borrar_archivo() {
-        let _ = std::fs::remove_file("src/canciones.json");
-    }
 
     #[test]
     fn test_new_cancion() {
@@ -197,38 +191,35 @@ mod tests {
 
     #[test]
     fn test_new_playlist() {
-        borrar_archivo();
-        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let playlist = Playlist::new("test_new_playlist".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
         ]);
 
-        assert_eq!(playlist.nombre, "Rock Classics");
+        assert_eq!(playlist.nombre, "test_new_playlist");
         assert_eq!(playlist.canciones.len(), 2);
     }
 
     #[test]
     fn test_new_playlist_with_songs() {
-        borrar_archivo();
-        let playlist = Playlist::new("Rock Classics 1".to_string(), vec![
+        let playlist = Playlist::new("test_new_playlist_with_songs_1".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
         ]);
 
         playlist.escribir_archivo().unwrap();
 
-        let playlist = Playlist::new("Rock Classics 2".to_string(), vec![
+        let playlist = Playlist::new("test_new_playlist_with_songs_1".to_string(), vec![
             Cancion::new("Thriller".to_string(), "Micheal Jackson".to_string(), Genero::Pop),
         ]);
 
-        assert_eq!(playlist.nombre, "Rock Classics 2");
+        assert_eq!(playlist.nombre, "test_new_playlist_with_songs_1");
         assert_eq!(playlist.canciones.len(), 3);
     }
 
     #[test]
     fn test_agregar_cancion() {
-        borrar_archivo();
-        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let mut playlist = Playlist::new("test_agregar_cancion".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
         ]);
 
@@ -241,8 +232,7 @@ mod tests {
 
     #[test]
     fn test_eliminar_cancion() {
-        borrar_archivo();
-        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let mut playlist = Playlist::new("test_eliminar_cancion".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
         ]);
@@ -255,8 +245,7 @@ mod tests {
 
     #[test]
     fn test_mover_cancion() {
-        borrar_archivo();
-        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let mut playlist = Playlist::new("test_mover_cancion".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
             Cancion::new("Hotel California".to_string(), "Eagles".to_string(), Genero::Rock)
@@ -270,8 +259,7 @@ mod tests {
 
     #[test]
     fn test_buscar_cancion_por_nombre() {
-        borrar_archivo();
-        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let playlist = Playlist::new("test_buscar_cancion_por_nombre".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
             Cancion::new("Hotel California".to_string(), "Eagles".to_string(), Genero::Rock)
@@ -285,8 +273,7 @@ mod tests {
 
     #[test]
     fn test_obtener_canciones_genero() {
-        borrar_archivo();
-        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let playlist = Playlist::new("test_obtener_canciones_genero".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Thriller".to_string(), "Michael Jackson".to_string(), Genero::Pop),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
@@ -302,8 +289,7 @@ mod tests {
 
     #[test]
     fn test_obtener_canciones_artista() {
-        borrar_archivo();
-        let playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let playlist = Playlist::new("test_obtener_canciones_artista".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Thriller".to_string(), "Michael Jackson".to_string(), Genero::Pop),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock),
@@ -319,8 +305,7 @@ mod tests {
 
     #[test]
     fn test_modificar_titulo() {
-        borrar_archivo();
-        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let mut playlist = Playlist::new("test_modificar_titulo".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
         ]);
@@ -332,8 +317,7 @@ mod tests {
 
     #[test]
     fn test_vaciar() {
-        borrar_archivo();
-        let mut playlist = Playlist::new("Rock Classics".to_string(), vec![
+        let mut playlist = Playlist::new("test_vaciar".to_string(), vec![
             Cancion::new("Bohemian Rhapsody".to_string(), "Queen".to_string(), Genero::Rock),
             Cancion::new("Stairway to Heaven".to_string(), "Led Zeppelin".to_string(), Genero::Rock)
         ]);

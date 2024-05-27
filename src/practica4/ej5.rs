@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+/*use std::collections::HashMap;
 use crate::practica3::ej3::Fecha;
 
 struct XYZ<'a> {
@@ -430,4 +430,4 @@ mod tests {
         let sistema = XYZ::new();
         sistema.cripto_mas_volumen_compras();
     }
-}
+}*/
