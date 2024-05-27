@@ -177,7 +177,7 @@ impl Playlist {
     }
 }
 
-//FIXME: Si ejecuto todos los test de una vez, a veces falla pero si los ejecuto uno por uno no falla nunca
+//FIXME: Que el nombre del archivo sea el nombre del test
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,4 +1,4 @@
-/*use std::collections::HashMap;
+use std::collections::HashMap;
 use crate::practica3::ej3::Fecha;
 
 struct XYZ<'a> {
@@ -6,6 +6,8 @@ struct XYZ<'a> {
     cotizaciones: HashMap<String, f64>,
     criptomonedas: Vec<CriptoMoneda>,
     transacciones: Vec<Transaccion<'a>>,
+    // HashMap<dni, vec<criptomonedas>>
+    balances: HashMap<String, Vec<String>>
 }
 
 struct Usuario {
@@ -13,7 +15,7 @@ struct Usuario {
     apellido: String,
     email: String,
     dni: String,
-    balance: HashMap<String, f64>,
+    // balance: HashMap<String, f64>,
     identidad: bool
 }
 
@@ -270,7 +272,7 @@ mod tests {
     #[test]
     fn test_ingresar_dinero() {
         let mut sistema = XYZ::new();
-        let mut usuario = create_user_with_identity("John", "Doe", "john@example.com", "12345678");
+        let mut usuario = create_user_with_identity("Juan", "Garcia", "juan@example.com", "12345678");
 
         sistema.ingresar_dinero(&mut usuario, 100.0);
 
@@ -281,7 +283,7 @@ mod tests {
     #[test]
     fn test_comprar_cripto() {
         let mut sistema = XYZ::new();
-        let mut usuario = create_user_with_identity("Jane", "Doe", "jane@example.com", "87654321");
+        let mut usuario = create_user_with_identity("Juan", "Garcia", "juan@example.com", "87654321");
 
         usuario.add_balance("fiat", 1000.0);
         sistema.add_cotizacion("BTC".to_string(), 50000.0);
@@ -428,4 +430,4 @@ mod tests {
         let sistema = XYZ::new();
         sistema.cripto_mas_volumen_compras();
     }
-}*/
+}
