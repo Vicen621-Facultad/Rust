@@ -1,4 +1,4 @@
-//TODO: Terminar
+/*//TODO: Terminar
 use std::ops::Deref;
 use crate::practica3::ej3::Fecha;
 
@@ -67,7 +67,7 @@ trait GestorClientes {
 }
 
 trait GestorVentas<'a> {
-    fn crear_venta(&mut self, productos: Vec<Producto>, cliente: &'a Cliente, vendedor: &'a Vendedor, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta;
+    fn crear_venta(&mut self, productos: Vec<Producto>, datos_persona_cliente: DatosPersona, dni_cliente: String, datos_persona_vendedor: DatosPersona, legajo_vendedor: u32, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta;
 }
 
 impl<'a> GestorVendedores for SistemaVentas<'a> {
@@ -93,11 +93,17 @@ impl<'a> GestorClientes for SistemaVentas<'a> {
 }
 
 impl<'a> GestorVentas<'a> for SistemaVentas<'a> {
-    fn crear_venta(&mut self, productos: Vec<Producto>, cliente: &'a Cliente, vendedor: &'a Vendedor, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta{
-        if (self.get_cliente(&cliente.dni)).is_none() {
-            // self.crear_cliente(cliente.nombre, cliente.apellido, cliente.direccion, cliente.dni);
+    //FIXME: cannot borrow 'self.ventas' as mutable because it is also borrowed as immutable
+    fn crear_venta(&mut self, productos: Vec<Producto>, datos_persona_cliente: DatosPersona, dni_cliente: String, datos_persona_vendedor: DatosPersona, legajo_vendedor: u32, metodo_pago: MetodoPago, fecha: Fecha) -> &'a Venta{
+        if (self.get_cliente(&dni_cliente)).is_none() {
+            self.crear_cliente(datos_persona_cliente.nombre, datos_persona_cliente.apellido, datos_persona_cliente.direccion, dni_cliente.clone());
+        }
+        if self.get_vendedor(legajo_vendedor).is_none() {
+            self.crear_vendedor(datos_persona_vendedor.nombre, datos_persona_vendedor.apellido, datos_persona_vendedor.direccion, datos_persona_vendedor.dni, legajo_vendedor);
         }
 
+        let cliente = self.get_cliente(&dni_cliente).unwrap();
+        let vendedor = self.get_vendedor(legajo_vendedor).unwrap();
         self.ventas.push(Venta::new(productos, cliente, &vendedor, metodo_pago, fecha));
         self.ventas.last().unwrap()
     }
@@ -229,6 +235,7 @@ impl Vendedor {
     }
 }
 
+//TODO: preguntar si se puede usar el Deref
 impl Deref for Cliente {
     type Target = DatosPersona;
 
@@ -254,3 +261,13 @@ impl Cliente {
         self.correo.is_some()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_name() {
+        
+    }
+}*/
