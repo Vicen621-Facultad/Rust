@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use rand::{thread_rng, Rng};
+
 use crate::practica3::ej3::Fecha;
 
 struct XYZ {
@@ -112,7 +114,10 @@ impl GestorMonedas for XYZ {
         if self.verificar_identidad(dni_usuario) && self.get_balance(dni_usuario, criptomoneda) >= monto {
             let cotizacion: f64 = self.get_cotizacion(&criptomoneda);
             self.remove_balance(dni_usuario, &criptomoneda, monto);
-            self.crear_transaccion(TipoTransaccion::RetiroCripto { monto, criptomoneda: criptomoneda.to_string(), cotizacion, blockchain: blockchain.to_string(), hash: "".to_string() }, dni_usuario);
+
+            let hash = self.get_criptomoneda(criptomoneda).unwrap().blockchains.iter().find(|b| b.nombre == blockchain).unwrap().withdraw();
+
+            self.crear_transaccion(TipoTransaccion::RetiroCripto { monto, criptomoneda: criptomoneda.to_string(), cotizacion, blockchain: blockchain.to_string(), hash }, dni_usuario);
         }
     }
 
@@ -120,6 +125,7 @@ impl GestorMonedas for XYZ {
         if self.verificar_identidad(dni_usuario) {
             let cotizacion: f64 = self.get_cotizacion(&criptomoneda);
             self.add_balance(dni_usuario, &criptomoneda, monto);
+            
             self.crear_transaccion(TipoTransaccion::RecepcionCripto { monto, criptomoneda: criptomoneda.to_string(), blockchain: blockchain.to_string(), cotizacion }, dni_usuario);
         }
     }
@@ -274,6 +280,12 @@ impl Usuario {
 
     fn get_identidad(&self) -> bool {
         self.identidad
+    }
+}
+
+impl BlockChain {
+    fn withdraw(&self) -> String {
+        self.nombre.clone() + thread_rng().gen_range(0..100).to_string().as_str()
     }
 }
 

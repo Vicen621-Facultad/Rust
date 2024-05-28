@@ -430,4 +430,16 @@ mod tests {
         assert_eq!(CategoriaProducto::Limpieza.get_descuento(), 0.15);
         assert_eq!(CategoriaProducto::Otros.get_descuento(), 0.0);
     }
+
+    #[test]
+    fn test_deref_cliente() {
+        let cliente = Cliente::new("Juan".to_string(), "Perez".to_string(), "Calle falsa 123".to_string(), "12345678".to_string());
+        assert_eq!(*cliente, cliente.datos);
+    }
+
+    #[test]
+    fn test_deref_vendedor() {
+        let vendedor = Vendedor::new("Juan".to_string(), "Perez".to_string(), "Calle falsa 123".to_string(), "12345678".to_string(), 1);
+        assert_eq!(*vendedor, vendedor.datos);
+    }
 }
