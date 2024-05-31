@@ -222,11 +222,49 @@ impl Estadisticas for XYZ {
     }
 
     fn cripto_mas_volumen_venta(&self) -> String {
-        todo!("Preguntar que significa volumen de ventas");
+        self.transacciones.iter().filter(|t| match t.tipo {
+            TipoTransaccion::VentaCripto { .. } => true,
+            _ => false
+        }).fold(HashMap::new(), |mut acc, t| {
+            let criptomoneda = match &t.tipo {
+                TipoTransaccion::VentaCripto { criptomoneda, .. } => criptomoneda,
+                _ => ""
+            };
+            let entry = acc.entry(criptomoneda).or_insert(0.0);
+            let monto = match t.tipo {
+                TipoTransaccion::VentaCripto { monto, .. } => monto,
+                _ => 0.0
+            };
+            *entry += monto;
+            acc
+        }).iter()
+        .max_by(|(_, &v1), (_, &v2)| v1.partial_cmp(&v2)
+        .unwrap_or(std::cmp::Ordering::Equal))
+        .map(|(k, _)| k.to_string())
+        .unwrap_or("".to_string())
     }
 
     fn cripto_mas_volumen_compras(&self) -> String {
-        todo!("Preguntar que significa volumen de compras");
+        self.transacciones.iter().filter(|t| match t.tipo {
+            TipoTransaccion::CompraCripto { .. } => true,
+            _ => false
+        }).fold(HashMap::new(), |mut acc, t| {
+            let criptomoneda = match &t.tipo {
+                TipoTransaccion::CompraCripto { criptomoneda, .. } => criptomoneda,
+                _ => ""
+            };
+            let entry = acc.entry(criptomoneda).or_insert(0.0);
+            let monto = match t.tipo {
+                TipoTransaccion::CompraCripto { monto, .. } => monto,
+                _ => 0.0
+            };
+            *entry += monto;
+            acc
+        }).iter()
+        .max_by(|(_, &v1), (_, &v2)| v1.partial_cmp(&v2)
+        .unwrap_or(std::cmp::Ordering::Equal))
+        .map(|(k, _)| k.to_string())
+        .unwrap_or("".to_string())
     }
 }
 
@@ -501,18 +539,27 @@ mod tests {
         assert_eq!(sistema.cripto_mas_ventas(), "BTC");
     }
 
-    // Tests for methods not yet implemented
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_cripto_mas_volumen_venta() {
-        let sistema = XYZ::new();
-        sistema.cripto_mas_volumen_venta();
+        let mut sistema = XYZ::new();
+        sistema.crear_usuario( "Jack", "Nicholson", "jack@example.com", "43211234", true);
+
+        sistema.crear_transaccion(TipoTransaccion::VentaCripto { monto: 0.01, criptomoneda: "BTC".to_string(), cotizacion: 50000.0 }, "43211234");
+        sistema.crear_transaccion(TipoTransaccion::VentaCripto { monto: 0.02, criptomoneda: "ETH".to_string(), cotizacion: 2500.0 }, "43211234");
+        sistema.crear_transaccion( TipoTransaccion::VentaCripto { monto: 0.03, criptomoneda: "BTC".to_string(), cotizacion: 50000.0 }, "43211234");
+
+        assert_eq!(sistema.cripto_mas_volumen_venta(), "BTC");
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_cripto_mas_volumen_compras() {
-        let sistema = XYZ::new();
-        sistema.cripto_mas_volumen_compras();
+        let mut sistema = XYZ::new();
+        sistema.crear_usuario( "Jack", "Nicholson", "jack@example.com", "43211234", true);
+
+        sistema.crear_transaccion(TipoTransaccion::CompraCripto { monto: 500.0, criptomoneda: "BTC".to_string(), cotizacion: 50000.0 }, "43211234");
+        sistema.crear_transaccion(TipoTransaccion::CompraCripto { monto: 300.0, criptomoneda: "ETH".to_string(), cotizacion: 2500.0 }, "43211234");
+        sistema.crear_transaccion(TipoTransaccion::CompraCripto { monto: 700.0, criptomoneda: "BTC".to_string(), cotizacion: 50000.0 }, "43211234");
+
+        assert_eq!(sistema.cripto_mas_volumen_compras(), "BTC");
     }
 }
