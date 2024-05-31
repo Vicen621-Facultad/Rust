@@ -103,7 +103,7 @@ impl Auto {
 
 impl ConcesionarioAuto {
     fn new(nombre: String, direccion: String, capacidad: usize) -> ConcesionarioAuto {
-        let autos = match std::fs::File::open("src/autos.json") {
+        let autos = match std::fs::File::open("test/".to_string() + nombre.as_str() + ".json") {
             Ok(mut file) => {
                 let mut buf = String::new();
                 //TODO: Preguntar si se puede hacer unwrap en lugar de match
@@ -127,7 +127,7 @@ impl ConcesionarioAuto {
     }
 
     fn escribir_archivo(&self) -> Result<(), io::Error> {
-        let mut file = File::create("src/autos.json")?;
+        let mut file = File::create("test/".to_string() + self.nombre.as_str() + ".json")?;
         let serialized = serde_json::to_string(&self.autos)?;
         file.write_all(&serialized.as_bytes())?;
         Ok(())
@@ -177,10 +177,6 @@ impl Display for ErrorConcesionaria {
 mod tests {
     use super::*;
 
-    fn borrar_archivo() {
-        let _ = std::fs::remove_file("src/autos.json");
-    }
-
     #[test]
     fn test_color_es_primario() {
         assert!(Color::Rojo.es_primario());
@@ -225,10 +221,9 @@ mod tests {
 
     #[test]
     fn test_new_concesionario_auto() {
-        borrar_archivo();
-        let concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 10);
+        let concesionario = ConcesionarioAuto::new("test_new_concesionario_auto".to_string(), "Calle A".to_string(), 10);
 
-        assert_eq!(concesionario.nombre, "Autos Juan");
+        assert_eq!(concesionario.nombre, "test_new_concesionario_auto");
         assert_eq!(concesionario.direccion, "Calle A");
         assert_eq!(concesionario.capacidad, 10);
         assert_eq!(concesionario.autos.len(), 0);
@@ -236,17 +231,16 @@ mod tests {
 
     #[test]
     fn test_new_concesionario_auto_file() {
-        borrar_archivo();
-        let mut concesionario1 = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 10);
+        let mut concesionario1 = ConcesionarioAuto::new("test_new_concesionario_auto_file".to_string(), "Calle A".to_string(), 10);
 
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         concesionario1.agregar_auto(auto1).unwrap();
 
-        let mut concesionario2 = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 10);
+        let mut concesionario2 = ConcesionarioAuto::new("test_new_concesionario_auto_file".to_string(), "Calle A".to_string(), 10);
         let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2000, 50000.0, Color::Rojo);
         concesionario2.agregar_auto(auto2).unwrap();
 
-        assert_eq!(concesionario2.nombre, "Autos Juan");
+        assert_eq!(concesionario2.nombre, "test_new_concesionario_auto_file");
         assert_eq!(concesionario2.direccion, "Calle A");
         assert_eq!(concesionario2.capacidad, 10);
         assert_eq!(concesionario2.autos.len(), 2);
@@ -254,8 +248,7 @@ mod tests {
 
     #[test]
     fn test_agregar_auto() {
-        borrar_archivo();
-        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let mut concesionario = ConcesionarioAuto::new("test_agregar_auto".to_string(), "Calle A".to_string(), 2);
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
 
@@ -266,8 +259,7 @@ mod tests {
 
     #[test]
     fn test_eliminar_auto() {
-        borrar_archivo();
-        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let mut concesionario = ConcesionarioAuto::new("test_eliminar_auto".to_string(), "Calle A".to_string(), 2);
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
 
@@ -282,8 +274,7 @@ mod tests {
 
     #[test]
     fn test_buscar_auto() {
-        borrar_archivo();
-        let mut concesionario = ConcesionarioAuto::new("Autos Juan".to_string(), "Calle A".to_string(), 2);
+        let mut concesionario = ConcesionarioAuto::new("test_buscar_auto".to_string(), "Calle A".to_string(), 2);
         let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
         let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
         let auto3 = Auto::new("BMW".to_string(), "M3 Classic".to_string(), 1999, 20000.0, Color::Negro);

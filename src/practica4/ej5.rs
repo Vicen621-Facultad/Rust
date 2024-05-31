@@ -115,9 +115,8 @@ impl GestorMonedas for XYZ {
             let cotizacion: f64 = self.get_cotizacion(&criptomoneda);
             self.remove_balance(dni_usuario, &criptomoneda, monto);
 
-            let hash = self.get_criptomoneda(criptomoneda).unwrap().blockchains.iter().find(|b| b.nombre == blockchain).unwrap().withdraw();
-
-            self.crear_transaccion(TipoTransaccion::RetiroCripto { monto, criptomoneda: criptomoneda.to_string(), cotizacion, blockchain: blockchain.to_string(), hash }, dni_usuario);
+            //TODO: Llamar a funcion de hash de blockchain
+            self.crear_transaccion(TipoTransaccion::RetiroCripto { monto, criptomoneda: criptomoneda.to_string(), cotizacion, blockchain: blockchain.to_string(), hash: "".to_string() }, dni_usuario);
         }
     }
 

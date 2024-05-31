@@ -1,6 +1,7 @@
 use chrono::{Datelike, Local};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Fecha {
     day: u32,
     month: u32,
