@@ -293,6 +293,46 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_usuario_set_identidad() {
+        let mut usuario = Usuario::new("Jose".to_string(), "Maria".to_string(), "josemaria@test.com".to_string(), "12345678".to_string(), false); 
+
+        assert!(!usuario.get_identidad());
+        usuario.set_identidad(true);
+        assert!(usuario.get_identidad());
+    }
+
+    #[test]
+    fn test_add_criptomoneda() {
+        let mut sistema = XYZ::new();
+        let criptomoneda = CriptoMoneda {
+            nombre: "Bitcoin".to_string(),
+            prefijo: "BTC".to_string(),
+            blockchains: vec![BlockChain { nombre: "Bitcoin".to_string(), prefijo: "BTC".to_string() }]
+        };
+
+        sistema.add_criptomoneda(criptomoneda);
+
+        assert_eq!(sistema.criptomonedas.len(), 1);
+    }
+
+    #[test]
+    fn test_get_criptomoneda() {
+        let mut sistema = XYZ::new();
+        let criptomoneda = CriptoMoneda {
+            nombre: "Bitcoin".to_string(),
+            prefijo: "BTC".to_string(),
+            blockchains: vec![BlockChain { nombre: "Bitcoin".to_string(), prefijo: "BTC".to_string() }]
+        };
+
+        sistema.add_criptomoneda(criptomoneda);
+
+        let found_criptomoneda = sistema.get_criptomoneda("Bitcoin");
+
+        assert!(found_criptomoneda.is_some());
+        assert_eq!(found_criptomoneda.unwrap().nombre, "Bitcoin");
+    }
+
+    #[test]
     fn test_ingresar_dinero() {
         let mut sistema = XYZ::new();
         sistema.crear_usuario("Juan", "Garcia", "juan@example.com", "12345678", true);

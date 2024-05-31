@@ -11,7 +11,7 @@ enum Color {
     Negro
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 struct Auto {
     marca: String,
     modelo: String,
@@ -150,8 +150,8 @@ impl ConcesionarioAuto {
         let position = self.autos.iter().position(|a| a.equals(auto));
 
         match position {
-            Some(_) => {
-                self.autos.remove(position.unwrap());
+            Some(pos) => {
+                self.autos.remove(pos);
                 let res = self.escribir_archivo();
                 match res {
                     Ok(_) => Ok(()),
@@ -200,8 +200,8 @@ mod tests {
 
     #[test]
     fn test_auto_equals() {
-        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
-        let auto2 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Blanco);
+        let auto2 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Blanco);
         let auto3 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
 
         assert!(auto1.equals(&auto2));
@@ -260,14 +260,15 @@ mod tests {
     #[test]
     fn test_eliminar_auto() {
         let mut concesionario = ConcesionarioAuto::new("test_eliminar_auto".to_string(), "Calle A".to_string(), 2);
-        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Azul);
+        let auto1 = Auto::new("Toyota".to_string(), "Corolla".to_string(), 2022, 25000.0, Color::Amarillo);
         let auto2 = Auto::new("BMW".to_string(), "X5".to_string(), 2020, 50000.0, Color::Rojo);
+        let auto3 = Auto::new("Audi".to_string(), "A3".to_string(), 2020, 50000.0, Color::Verde);
 
         let _ = concesionario.agregar_auto(auto1.clone());
         let _ = concesionario.agregar_auto(auto2.clone());
 
-        concesionario.eliminar_auto(&auto1).unwrap();
-
+        assert!(concesionario.eliminar_auto(&auto1).is_ok());
+        assert!(concesionario.eliminar_auto(&auto3).is_err());
         assert_eq!(concesionario.autos.len(), 1);
         assert!(concesionario.autos[0].equals(&auto2));
     }

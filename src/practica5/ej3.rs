@@ -11,6 +11,12 @@ enum Animal {
     Otros
 }
 
+impl Default for Animal {
+    fn default() -> Self {
+        Animal::Otros
+    }
+}
+
 impl Animal {
     fn to_string(&self) -> String {
         match self {
@@ -26,7 +32,7 @@ impl Animal {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 struct Mascota {
     nombre: String,
     edad: u32, 
@@ -53,7 +59,7 @@ impl Mascota {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 struct Duenio {
     nombre: String,
     direccion: String,
@@ -274,6 +280,49 @@ impl Veterinaria {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_to_string_animal() {
+        assert_eq!(Animal::Perro.to_string(), "perro");
+        assert_eq!(Animal::Gato.to_string(), "gato");
+        assert_eq!(Animal::Caballo.to_string(), "caballo");
+        assert_eq!(Animal::Otros.to_string(), "otros");
+    }
+
+    #[test]
+    fn test_equals_animal() {
+        assert!(Animal::Perro.equals(&Animal::Perro));
+        assert!(!Animal::Perro.equals(&Animal::Gato));
+    }
+
+    #[test]
+    fn test_equals_duenio() {
+        let duenio1 = Duenio::new("Juan".to_string(), "Calle A".to_string(), "123456789".to_string());
+        let duenio2 = Duenio::new("Juan".to_string(), "Calle A".to_string(), "123456789".to_string());
+        let duenio3 = Duenio::new("Maria".to_string(), "Calle B".to_string(), "987654321".to_string());
+
+        assert!(duenio1.equals(&duenio2));
+        assert!(!duenio1.equals(&duenio3));
+    }
+
+    #[test]
+    fn test_new_veterinaria_con_atenciones() {
+        let mut vet1 = Veterinaria::new("test_new_veterinaria_con_atenciones".to_string(), "Dirección".to_string(), 1);
+        
+        assert_eq!(vet1.atenciones.len(), 0);
+        assert!(vet1.registrar_atencion(AtencionRealizada::new(
+            Mascota::default(), 
+            "diagnostico".to_string(), 
+            "tratamiento".to_string(), 
+            None,
+        )).is_ok());
+        assert_eq!(vet1.atenciones.len(), 1);
+
+        let vet2 = Veterinaria::new("test_new_veterinaria_con_atenciones".to_string(), "Dirección".to_string(), 1);
+
+        assert_eq!(vet2.nombre, "test_new_veterinaria_con_atenciones");
+        assert_eq!(vet2.atenciones.len(), 1);
+    }
     
     #[test]
     fn test_agregar_mascota() {

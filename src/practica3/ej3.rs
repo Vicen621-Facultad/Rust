@@ -8,6 +8,12 @@ pub struct Fecha {
     year: i32,
 }
 
+impl Default for Fecha {
+    fn default() -> Self {
+        Fecha::now()
+    }
+}
+
 impl Fecha {
     pub fn now() -> Self {
         let now = Local::now();

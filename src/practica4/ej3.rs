@@ -89,7 +89,6 @@ trait Estadisticas {
 }
 
 impl Estadisticas for StreamingRust {
-    //TODO: Preguntar a ver si esta bien esto o se deberia hacer de otra manera
     fn metodo_pago_activo_mas_usado(&self) -> Option<MetodoPago> {
         let mut metodo_pagos = HashMap::new();
 
